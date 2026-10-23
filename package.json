@@ -1,0 +1,14 @@
+{
+  "name": "watermarkout",
+  "version": "1.0.0",
+  "description": "AI Watermark Remover — local in-browser processing with OpenCV.js + FFmpeg.wasm",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx serve . --cors --no-clipboard -p 3000",
+    "build": "echo 'Static site — no build step needed'",
+    "start": "npx serve . --cors -p 3000"
+  },
+  "keywords": ["watermark", "removal", "opencv", "ffmpeg", "inpainting"],
+  "license": "MIT"
+}
