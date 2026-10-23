@@ -357,7 +357,8 @@ async function executeImageRemoval() {
 }
 
 async function downloadCleanedImage() {
-  if (!cleanedCanvas) {
+  const canvasToUse = $('imgAfterCanvas') || cleanedCanvas;
+  if (!canvasToUse) {
     toast('No processed image to download', 'error', 2000);
     return;
   }
@@ -386,7 +387,7 @@ async function downloadCleanedImage() {
   }
 
   try {
-    const blob = await canvasToBlob(cleanedCanvas, mimeType, quality);
+    const blob = await canvasToBlob(canvasToUse, mimeType, quality);
     const originalName = currentImageFile ? currentImageFile.name.replace(/\.[^/.]+$/, '') : 'gemini-cleaned';
     const outputName = `${originalName}-clean.${ext}`;
     downloadBlob(blob, outputName);
@@ -398,10 +399,11 @@ async function downloadCleanedImage() {
 }
 
 async function copyCleanedImageToClipboard() {
-  if (!cleanedCanvas) return;
+  const canvasToUse = $('imgAfterCanvas') || cleanedCanvas;
+  if (!canvasToUse) return;
 
   try {
-    const blob = await canvasToBlob(cleanedCanvas, 'image/png');
+    const blob = await canvasToBlob(canvasToUse, 'image/png');
     if (!navigator.clipboard || !navigator.clipboard.write) {
       throw new Error('Clipboard API not supported in this browser');
     }

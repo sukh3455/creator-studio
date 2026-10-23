@@ -29,6 +29,20 @@ export async function getWatermarkEngine() {
  * @param {Function} [opts.onProgress]
  * @returns {Promise<HTMLCanvasElement>}
  */
+function ensureDOMCanvas(canvas) {
+  if (typeof document === 'undefined') return canvas;
+  if (canvas instanceof HTMLCanvasElement) return canvas;
+
+  const domCanvas = document.createElement('canvas');
+  domCanvas.width = canvas.width;
+  domCanvas.height = canvas.height;
+  const ctx = domCanvas.getContext('2d');
+  ctx.drawImage(canvas, 0, 0);
+  domCanvas.__watermarkMeta = canvas.__watermarkMeta;
+  domCanvas.__watermarkTiming = canvas.__watermarkTiming;
+  return domCanvas;
+}
+
 export async function removeWatermarkImage(srcCanvas, maskRect, opts = {}) {
   const onProg = opts.onProgress ?? (() => {});
   onProg(0.15);
@@ -43,7 +57,7 @@ export async function removeWatermarkImage(srcCanvas, maskRect, opts = {}) {
     });
     if (pipelineCanvas && pipelineCanvas.__watermarkMeta && pipelineCanvas.__watermarkMeta.applied) {
       onProg(1.0);
-      return pipelineCanvas;
+      return ensureDOMCanvas(pipelineCanvas);
     }
   } catch (err) {
     console.warn('Auto pipeline did not apply:', err);

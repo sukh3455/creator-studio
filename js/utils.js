@@ -65,10 +65,50 @@ export async function waitForCV() {
 export function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
 /**
- * Canvas → Blob Promise
+ * Canvas → Blob Promise (supports both HTMLCanvasElement and OffscreenCanvas)
  */
-export function canvasToBlob(canvas, mime = 'image/png', quality = 0.95) {
-  return new Promise(r => canvas.toBlob(r, mime, quality));
+export async function canvasToBlob(canvas, mime = 'image/png', quality = 0.95) {
+  if (!canvas) throw new Error('No canvas provided to canvasToBlob');
+
+  // OffscreenCanvas uses convertToBlob()
+  if (typeof canvas.convertToBlob === 'function') {
+    return await canvas.convertToBlob({ type: mime, quality });
+  }
+
+  // HTMLCanvasElement uses toBlob(callback)
+  if (typeof canvas.toBlob === 'function') {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(
+        blob => {
+          if (blob) resolve(blob);
+          else reject(new Error('Failed to encode canvas to blob'));
+        },
+        mime,
+        quality
+      );
+    });
+  }
+
+  // Universal DOM fallback: draw onto standard canvas
+  if (typeof document !== 'undefined') {
+    const temp = document.createElement('canvas');
+    temp.width = canvas.width;
+    temp.height = canvas.height;
+    const ctx = temp.getContext('2d');
+    ctx.drawImage(canvas, 0, 0);
+    return new Promise((resolve, reject) => {
+      temp.toBlob(
+        blob => {
+          if (blob) resolve(blob);
+          else reject(new Error('Failed to encode canvas to blob'));
+        },
+        mime,
+        quality
+      );
+    });
+  }
+
+  throw new Error('Canvas element does not support toBlob or convertToBlob');
 }
 
 /**
