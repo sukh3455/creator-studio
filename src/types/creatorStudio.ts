@@ -29,6 +29,8 @@ export const RESOLUTIONS: Record<AspectRatio, ResolutionConfig> = {
 };
 
 export type StylePreset = 
+  | 'auto'
+  | 'vibrant_colors'
   | 'festive' 
   | 'corporate' 
   | 'cyberpunk' 

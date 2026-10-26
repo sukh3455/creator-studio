@@ -63,6 +63,32 @@ describe('Creative Planner & Offline Deterministic Fallback', () => {
     expect(scene2.elements.some(e => e.type === 'device_mockup')).toBe(true);
   });
 
+  it('generates an authentic Holi Festival of Colors reel with zero agency copy pollution', async () => {
+    const prompt = 'Create a vibrant 15-second reel about Holi the festival of colors with gulal powder splashes';
+    const result = await planCreativeProject(
+      prompt,
+      { duration: 15, aspectRatio: '9:16', stylePreset: 'auto' },
+      DEFAULT_SETTINGS
+    );
+
+    expect(result.project.scenes.length).toBe(3);
+    expect(result.project.stylePreset).toBe('vibrant_colors');
+
+    // Scene 1 must be Holi themed
+    const s1 = result.project.scenes[0];
+    expect(s1.theme).toBe('vibrant_colors');
+    expect(s1.captionText).toContain('RANG BARSE');
+
+    // Scene 2 must NOT contain agency template text
+    const s2 = result.project.scenes[1];
+    expect(s2.narration).not.toContain('Brand Identity');
+    expect(s2.captionText).not.toContain('60 FPS Motion Graphics');
+
+    // Scene 3 must be Happy Holi celebration
+    const s3 = result.project.scenes[2];
+    expect(s3.captionText).toContain('HAPPY HOLI');
+  });
+
   it('regenerates a scene and sets approved flag back to false', async () => {
     const originalScene: Scene = {
       id: 'sc_test_1',

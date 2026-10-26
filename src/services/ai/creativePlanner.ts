@@ -10,35 +10,36 @@ export interface PlanProjectOptions {
 }
 
 const SYSTEM_PLANNER_PROMPT = `You are the Lead Creative Director and Motion Graphics Architect for Creator Studio.
-You do NOT merely write lines of text over a plain background. You architect a complete, high-end motion graphics film with deliberate visual pacing, narrative progression, distinct scene compositions, and clear typography hierarchy.
+Your role is to design an authentic, art-directed motion graphics film that uniquely matches the user's specific subject and concept.
 
-CORE CREATIVE DIRECTIVES:
-1. NARRATIVE ARC & 3-ACT STRUCTURE:
-   - Scene 1 (Hook / Dawn): layout "split_editorial", camera "zoom_in". Compelling thesis/question, kicker tag, bold kinetic typography, vector coordinate guidelines.
-   - Scene 2 (Craft / Proof / Value): layout "metric_grid" or "hero_badge", camera "pan_drift_up". 3 structured value pillars or glassmorphic hero card showing concrete benefits/features.
-   - Scene 3 (Climax / Grand Outro): layout "brand_outro", camera "zoom_out". High-authority brand crest monogram, travelling specular metallic light sweep, elegant tagline, and actionable CTA button.
+CRITICAL CREATIVE DIRECTIVES:
+1. SUBJECT-AUTHENTIC STORYTELLING:
+   - If the user asks for a cultural festival (e.g. Holi, Diwali, Eid, Christmas), write specifically about that festival's traditions, colors, music, and emotional warmth.
+   - Do NOT use generic business templates, corporate jargon, or agency portfolio copy ("Brand Identity Systems", "60 FPS Motion Graphics", "High-Converting Ads") unless the user explicitly requested a graphic design portfolio video.
+   - If the video is about a product, fitness, coffee, travel, or event, tailor every sentence and visual element to that exact theme.
 
-2. VISUAL DIVERSITY (NO REPETITIVE BACKGROUNDS):
+2. 3-ACT NARRATIVE STRUCTURE:
+   - Scene 1 (Hook / Dawn): layout "split_editorial", camera "zoom_in". Compelling thesis/question, cultural or topic kicker badge, bold kinetic typography.
+   - Scene 2 (Immersion / Experience / Value): layout "metric_grid" or "hero_badge", camera "pan_drift_up". 3 structured highlights or features.
+   - Scene 3 (Climax / Finale): layout "brand_outro", camera "zoom_out". High-impact celebratory crest or monogram, metallic light sweep, festive tagline, and topic-relevant CTA button.
+
+3. DIVERSE VISUAL ATMOSPHERE:
    - Never use the same background color or layout across scenes.
-   - Provide contrasting deep background colors for each scene (e.g. Scene 1 #0B0F19, Scene 2 #080E1C, Scene 3 #0D0801).
-   - Assign cameraMotion to each scene ("zoom_in", "zoom_out", "pan_drift_up", "pan_drift_down").
-
-3. TYPOGRAPHY & LAYOUT SAFETY:
-   - Headlines must be punchy (3-6 words), kickers (2-4 words).
-   - Do NOT invent fake phone numbers, URLs, or factual claims.
+   - Assign distinct contrasting backgrounds suited to the subject (e.g., deep ultraviolet/berry for Holi, warm dark amber for Diwali, dark slate for tech).
+   - Assign camera motions: "zoom_in", "zoom_out", "pan_drift_up", "pan_drift_down".
 
 CRITICAL JSON OUTPUT RULES:
 Return ONLY a valid JSON object matching this schema without markdown codeblocks or commentary:
 {
   "title": "Short punchy project title",
   "description": "Brief 1-2 sentence description",
-  "stylePreset": "festive | corporate | cyberpunk | minimal | luxury_gold | neon_glow",
+  "stylePreset": "vibrant_colors | festive | corporate | cyberpunk | minimal | luxury_gold | neon_glow",
   "brandKit": {
-    "name": "Brand Name",
+    "name": "Brand or Celebratory Title (e.g. Happy Holi)",
     "primaryColor": "#hex",
     "secondaryColor": "#hex",
     "accentColor": "#hex",
-    "tagline": "Short brand motto",
+    "tagline": "Short motto or festive blessing",
     "fontFamily": "serif | sans | mono"
   },
   "scenes": [
@@ -50,8 +51,8 @@ Return ONLY a valid JSON object matching this schema without markdown codeblocks
       "captionText": "Punchy 1-3 line kinetic caption overlay",
       "duration": 5,
       "visualType": "motion_graphic",
-      "theme": "luxury_gold | high_tech | cyberpunk | minimalist",
-      "backgroundColor": "#0B0F19",
+      "theme": "vibrant_colors | diwali_festive | luxury_gold | high_tech | cyberpunk | minimalist",
+      "backgroundColor": "#0F0728",
       "compositionLayout": "split_editorial | metric_grid | hero_badge | brand_outro | geometric_focus",
       "cameraMotion": "zoom_in | zoom_out | pan_drift_up | pan_drift_down | steady",
       "focalConcept": "Specific visual focal point concept",
@@ -70,6 +71,75 @@ Return ONLY a valid JSON object matching this schema without markdown codeblocks
 
 Total duration of all scenes must equal the requested target duration.`;
 
+// Helper: Extract 3 topic-specific highlights for Scene 2 without hardcoding agency text
+function extractContextualHighlights(
+  narration: string,
+  prompt: string,
+  isHoli: boolean,
+  isDiwali: boolean,
+  isFitness: boolean,
+  isTech: boolean,
+  isAgency: boolean
+): Array<{ num: string; title: string; desc: string }> {
+  if (isHoli) {
+    return [
+      { num: '01', title: 'Vibrant Gulal Powders', desc: 'Explosions of magenta, cyan & golden clouds' },
+      { num: '02', title: 'Dhol Beats & Dancing', desc: 'Rhythmic celebration of boundless joy' },
+      { num: '03', title: 'Sweet Festive Warmth', desc: 'Sharing gujiya and spreading love' }
+    ];
+  }
+  if (isDiwali) {
+    return [
+      { num: '01', title: 'Radiant Terracotta Diyas', desc: 'Golden light triumphing over darkness' },
+      { num: '02', title: 'Prosperity & Blessings', desc: 'Inviting abundance to every home' },
+      { num: '03', title: 'Cherished Feasts', desc: 'Warm sweet moments with family & friends' }
+    ];
+  }
+  if (isFitness) {
+    return [
+      { num: '01', title: 'Unstoppable Momentum', desc: 'Push beyond limits every single day' },
+      { num: '02', title: 'Peak Intensity', desc: 'Engineered for strength and endurance' },
+      { num: '03', title: 'Transformative Power', desc: 'Discipline that turns into triumph' }
+    ];
+  }
+  if (isTech) {
+    return [
+      { num: '01', title: 'Next-Gen Speed', desc: 'Lightning-fast execution in real-time' },
+      { num: '02', title: 'Intelligent Flow', desc: 'Automate complex execution effortlessly' },
+      { num: '03', title: 'Uncompromising Scale', desc: 'Reliability engineered for growth' }
+    ];
+  }
+  if (isAgency) {
+    return [
+      { num: '01', title: 'Brand Identity Systems', desc: 'Bespoke logos, guidelines & typography' },
+      { num: '02', title: '60 FPS Motion Graphics', desc: 'Cinematic visual storytelling' },
+      { num: '03', title: 'Performance Ad Creatives', desc: 'Engineered for viral retention' }
+    ];
+  }
+
+  // Generic prompt: Extract from narration sentences if available
+  const cleanSentences = narration.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 5);
+  if (cleanSentences.length >= 3) {
+    return [
+      { num: '01', title: cleanSentences[0].slice(0, 32), desc: cleanSentences[0].slice(32, 85) || cleanSentences[0] },
+      { num: '02', title: cleanSentences[1].slice(0, 32), desc: cleanSentences[1].slice(32, 85) || cleanSentences[1] },
+      { num: '03', title: cleanSentences[2].slice(0, 32), desc: cleanSentences[2].slice(32, 85) || cleanSentences[2] }
+    ];
+  }
+
+  // Contextual fallback from prompt words
+  const pWords = prompt.split(/\s+/).filter(w => w.length > 3);
+  const w1 = pWords[0] || 'Vision';
+  const w2 = pWords[1] || 'Experience';
+  const w3 = pWords[2] || 'Community';
+
+  return [
+    { num: '01', title: `${w1.toUpperCase()} & Purpose`, desc: 'Crafted with intention and passion' },
+    { num: '02', title: `${w2.toUpperCase()} in Motion`, desc: 'Dynamic visual storytelling in 60 FPS' },
+    { num: '03', title: `${w3.toUpperCase()} & Connection`, desc: 'Uniting people through great experiences' }
+  ];
+}
+
 export async function planCreativeProject(
   prompt: string,
   options: PlanProjectOptions = {},
@@ -77,14 +147,70 @@ export async function planCreativeProject(
 ): Promise<{ project: Project; usedAi: boolean; note?: string }> {
   const duration = options.duration || 15;
   const aspectRatio = options.aspectRatio || '9:16';
-  const stylePreset = options.stylePreset || 'luxury_gold';
-  const defaultBrand: BrandKit = options.brandKit || {
-    name: 'Sukh Graphix',
-    primaryColor: '#F59E0B',
-    secondaryColor: '#B45309',
-    accentColor: '#FEF08A',
-    tagline: 'Illuminating Creative Excellence',
-    fontFamily: 'serif'
+  let stylePreset = options.stylePreset || 'auto';
+
+  // Topic detection from prompt
+  const pLower = prompt.toLowerCase();
+  const isHoli = pLower.includes('holi') || pLower.includes('gulal') || pLower.includes('rang barse') || pLower.includes('colors festival') || pLower.includes('festival of colors');
+  const isDiwali = pLower.includes('diwali') || pLower.includes('deepavali') || pLower.includes('diya');
+  const isFitness = pLower.includes('gym') || pLower.includes('fitness') || pLower.includes('workout') || pLower.includes('sport');
+  const isTech = pLower.includes('tech') || pLower.includes('ai') || pLower.includes('cyber') || pLower.includes('crypto') || pLower.includes('software') || pLower.includes('saas');
+  const isAgency = pLower.includes('sukh') || pLower.includes('graphix') || pLower.includes('agency') || pLower.includes('design studio') || pLower.includes('portfolio');
+
+  // Auto-resolve style preset
+  if (stylePreset === 'auto') {
+    if (isHoli) stylePreset = 'vibrant_colors';
+    else if (isDiwali) stylePreset = 'festive';
+    else if (isFitness || isTech) stylePreset = 'cyberpunk';
+    else if (isAgency) stylePreset = 'luxury_gold';
+    else stylePreset = 'corporate';
+  }
+
+  // Brand Kit derivation (do not default to Sukh Graphix unless requested)
+  const userBrandName = options.brandKit?.name?.trim();
+  const hasUserBrand = Boolean(userBrandName && userBrandName.length > 0);
+
+  let brandName = userBrandName;
+  let brandTagline = options.brandKit?.tagline;
+  let primaryColor = options.brandKit?.primaryColor;
+  let secondaryColor = options.brandKit?.secondaryColor;
+  let accentColor = options.brandKit?.accentColor;
+
+  if (!hasUserBrand) {
+    if (isHoli) {
+      brandName = 'HAPPY HOLI';
+      brandTagline = 'Festival of Colors & Boundless Joy';
+      primaryColor = '#EC4899'; // Vibrant Gulal Magenta
+      secondaryColor = '#06B6D4'; // Cyan
+      accentColor = '#FACC15'; // Canary Yellow
+    } else if (isDiwali) {
+      brandName = 'SHUBH DEEPAVALI';
+      brandTagline = 'Festival of Lights & Prosperity';
+      primaryColor = '#F59E0B';
+      secondaryColor = '#B45309';
+      accentColor = '#FEF08A';
+    } else if (isAgency) {
+      brandName = 'Sukh Graphix';
+      brandTagline = 'Illuminating Creative Excellence';
+      primaryColor = '#F59E0B';
+      secondaryColor = '#B45309';
+      accentColor = '#FEF08A';
+    } else {
+      brandName = prompt.length > 25 ? 'CREATOR STUDIO' : prompt.toUpperCase();
+      brandTagline = 'Crafted For Modern Creators';
+      primaryColor = '#3B82F6';
+      secondaryColor = '#8B5CF6';
+      accentColor = '#38BDF8';
+    }
+  }
+
+  const defaultBrand: BrandKit = {
+    name: brandName!,
+    primaryColor: primaryColor || '#EC4899',
+    secondaryColor: secondaryColor || '#06B6D4',
+    accentColor: accentColor || '#FACC15',
+    tagline: brandTagline || '',
+    fontFamily: isHoli || isDiwali ? 'serif' : 'sans'
   };
 
   // Check if OpenRouter is configured
@@ -94,14 +220,14 @@ export async function planCreativeProject(
 Creative Idea Prompt: "${prompt}"
 Target Duration: ${duration} seconds.
 Aspect Ratio: ${aspectRatio}.
-Preferred Style Preset: ${stylePreset}.
+Resolved Style: ${stylePreset}.
 Brand Info: ${JSON.stringify(defaultBrand)}.
 
 Design a cohesive 3-scene motion graphics sequence:
 - Scene 1: Hook with split_editorial layout, zoom_in camera, kinetic_headline element.
-- Scene 2: Craft/Proof with metric_grid or hero_card layout, pan_drift_up camera, metric_grid element.
+- Scene 2: Immersion/Proof with metric_grid or hero_badge layout, pan_drift_up camera, metric_grid element with 3 subject-specific points.
 - Scene 3: Climax with brand_outro layout, zoom_out camera, brand_outro element.
-Ensure each scene has distinct background colors and rich visual concepts.`;
+IMPORTANT: Tailor every line of text strictly to "${prompt}". Do not use placeholder agency copy.`;
 
       const responseText = await callOpenRouter(
         [
@@ -131,21 +257,44 @@ Ensure each scene has distinct background colors and rich visual concepts.`;
 
       const scenes: Scene[] = rawScenes.map((s: any, idx: number) => {
         const title = s.title || s.label || s.sceneName || `Scene ${idx + 1}`;
-        const narration = s.narration || s.audio || s.speech || s.voiceover || s.script || s.description || '';
-        const captionText = s.captionText || s.caption || s.text || title;
+        const narration = s.narration || s.audio || s.speech || s.voiceover || s.script || s.action || s.description || s.visual || '';
+        const captionText = s.captionText || s.caption || s.text || s.headline || title;
         const sceneDuration = Number(s.duration) || Math.round(duration / Math.max(1, rawScenes.length));
         
-        // Theme & contrasting background colors per scene
-        const pLower = (prompt + ' ' + title).toLowerCase();
-        let theme: any = s.theme || (idx === 0 ? 'luxury_gold' : idx === 1 ? 'high_tech' : 'luxury_gold');
+        // Contextual theme & contrasting background colors per scene
+        let theme: any = 'luxury_gold';
         let bg = s.backgroundColor;
-        if (!bg) {
-          if (idx === 0) bg = '#0B0F19';
-          else if (idx === 1) bg = '#080E1C';
-          else bg = '#0D0801';
+
+        if (isHoli || stylePreset === 'vibrant_colors') {
+          theme = 'vibrant_colors';
+          if (!bg) {
+            if (idx === 0) bg = '#0F0728'; // Deep Ultraviolet Night
+            else if (idx === 1) bg = '#160838'; // Royal Berry Night
+            else bg = '#0B0520'; // Midnight Plum
+          }
+        } else if (isDiwali || stylePreset === 'festive') {
+          theme = 'diwali_festive';
+          if (!bg) {
+            if (idx === 0) bg = '#1E1100';
+            else if (idx === 1) bg = '#140A02';
+            else bg = '#0A0500';
+          }
+        } else if (isFitness || isTech || stylePreset === 'cyberpunk') {
+          theme = 'cyberpunk';
+          if (!bg) {
+            if (idx === 0) bg = '#080E1C';
+            else if (idx === 1) bg = '#061324';
+            else bg = '#040A14';
+          }
+        } else {
+          theme = 'luxury_gold';
+          if (!bg) {
+            if (idx === 0) bg = '#0B0F19';
+            else if (idx === 1) bg = '#080E1C';
+            else bg = '#0D0801';
+          }
         }
 
-        // Distinct layouts per scene
         const layout: CompositionLayout = s.compositionLayout || (
           idx === 0 ? 'split_editorial' : idx === 1 ? 'metric_grid' : 'brand_outro'
         );
@@ -155,69 +304,84 @@ Ensure each scene has distinct background colors and rich visual concepts.`;
         );
 
         const focalConcept = s.focalConcept || (
-          idx === 0 ? 'Editorial Headline & Vector Guides' :
-          idx === 1 ? '3-Tier Value Proposition Grid' :
-          'Brand Monogram Crest & Specular Sheen'
+          idx === 0 ? (isHoli ? 'Vibrant Gulal Cloud with Glowing Kinetic Typography' : 'Editorial Headline & Vector Guides') :
+          idx === 1 ? (isHoli ? '3-Tier Festive Highlight Cards in Vibrant Glassmorphism' : '3-Tier Value Proposition Grid') :
+          (isHoli ? 'Grand Luminous Festive Crest with Specular Sheen' : 'Brand Monogram Crest & Specular Sheen')
         );
 
-        // Guarantee rich motion-graphics elements
+        // Guarantee rich, topic-specific motion-graphics elements
         let elements = s.elements;
         if (!elements || !Array.isArray(elements) || elements.length === 0) {
           if (idx === 0) {
+            const kicker = isHoli
+              ? '✦ FESTIVAL OF COLORS ✦'
+              : isDiwali
+              ? '✨ SHUBH DEEPAVALI ✨'
+              : isAgency
+              ? '✦ SUKH GRAPHIX // CREATIVE STUDIO ✦'
+              : `✦ 01 // ${defaultBrand.name.toUpperCase()} ✦`;
+
             elements = [
               {
                 id: `elem_kh_${idx}_${Date.now()}`,
                 type: 'kinetic_headline',
                 props: {
-                  kicker: `✦ 01 // ${defaultBrand.name.toUpperCase()}`,
+                  kicker,
                   headline: captionText.replace(/\n.*/, ''),
-                  subtitle: narration.slice(0, 75) || 'Engineered for maximum visual authority.',
-                  accentColor: defaultBrand.primaryColor || '#F59E0B'
+                  subtitle: narration.slice(0, 95) || (isHoli ? 'Celebrate the joy, love, and vibrant colors of Holi.' : ''),
+                  accentColor: defaultBrand.primaryColor
                 }
               },
               {
                 id: `elem_p_${idx}`,
                 type: 'particles',
-                props: { count: 45, color: '#FBBF24', speed: 1.0 }
+                props: { count: 50, color: defaultBrand.primaryColor, speed: 1.0 }
               }
             ];
           } else if (idx === 1) {
+            const items = extractContextualHighlights(narration, prompt, isHoli, isDiwali, isFitness, isTech, isAgency);
             elements = [
               {
                 id: `elem_mg_${idx}_${Date.now()}`,
                 type: 'metric_grid',
                 props: {
-                  headline: 'CRAFT & CAPABILITIES',
-                  items: [
-                    { num: '01', title: 'Brand Identity Systems', desc: 'Distinctive logos & typography' },
-                    { num: '02', title: '60 FPS Motion Graphics', desc: 'Cinematic visual storytelling' },
-                    { num: '03', title: 'High-Converting Creatives', desc: 'Engineered for viral retention' }
-                  ]
+                  headline: isHoli ? 'COLORS OF CELEBRATION' : isDiwali ? 'FESTIVE LIGHT & JOY' : 'KEY HIGHLIGHTS',
+                  items
                 }
               },
               {
                 id: `elem_p_${idx}`,
                 type: 'particles',
-                props: { count: 50, color: '#38BDF8', speed: 1.2 }
+                props: { count: 60, color: defaultBrand.secondaryColor, speed: 1.2 }
               }
             ];
           } else {
+            const cta = isHoli
+              ? 'SHARE THE JOY →'
+              : isDiwali
+              ? 'CELEBRATE WITH US →'
+              : isFitness
+              ? 'JOIN THE MOVEMENT →'
+              : isAgency
+              ? 'START YOUR PROJECT →'
+              : 'DISCOVER MORE →';
+
             elements = [
               {
                 id: `elem_bo_${idx}_${Date.now()}`,
                 type: 'brand_outro',
                 props: {
                   brandName: defaultBrand.name,
-                  tagline: defaultBrand.tagline || 'Illuminating Creative Excellence',
-                  emblem: defaultBrand.name.slice(0, 2).toUpperCase() || 'SG',
-                  cta: 'START YOUR PROJECT →',
-                  glowColor: defaultBrand.primaryColor || '#F59E0B'
+                  tagline: defaultBrand.tagline,
+                  emblem: isHoli ? '✦' : isDiwali ? '✨' : defaultBrand.name.slice(0, 2).toUpperCase(),
+                  cta,
+                  glowColor: defaultBrand.primaryColor
                 }
               },
               {
                 id: `elem_p_${idx}`,
                 type: 'particles',
-                props: { count: 65, color: '#FEF08A', speed: 1.5 }
+                props: { count: 70, color: defaultBrand.accentColor, speed: 1.5 }
               }
             ];
           }
@@ -226,8 +390,8 @@ Ensure each scene has distinct background colors and rich visual concepts.`;
         return {
           id: `sc_${Date.now()}_${idx + 1}`,
           order: s.order || idx + 1,
-          title,
           label: s.label || (idx === 0 ? 'SCENE 1: HOOK' : idx === 1 ? 'SCENE 2: VALUE & PROOF' : 'SCENE 3: BRAND CLIMAX'),
+          title,
           narration,
           captionText,
           duration: sceneDuration,
@@ -309,6 +473,7 @@ Original scene JSON:
 ${JSON.stringify(scene, null, 2)}
 
 Overall Project Context:
+Topic / Concept: ${project.prompt}
 Brand: ${project.brandKit.name}
 Style: ${project.stylePreset}
 Target Duration: ${scene.duration} seconds.

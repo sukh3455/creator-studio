@@ -125,8 +125,10 @@ export class MotionGraphicsEngine {
       }
     }
 
-    // 6. Fallback or Theme Ambience (diwali/festive particles if requested)
-    if (scene.theme?.includes('diwali') || scene.theme?.includes('festive')) {
+    // 6. Cultural & Theme Ambience (Holi Gulal Powder bursts or Diwali Lamps)
+    if (scene.theme?.includes('holi') || scene.theme?.includes('vibrant')) {
+      this.drawHoliAmbience(rc);
+    } else if (scene.theme?.includes('diwali') || scene.theme?.includes('festive')) {
       this.drawDiwaliAmbience(rc);
     }
 
@@ -198,7 +200,11 @@ export class MotionGraphicsEngine {
     const orb1Radius = Math.max(width, height) * 0.65;
 
     const orb1Grad = ctx.createRadialGradient(orb1X, orb1Y, 20, orb1X, orb1Y, orb1Radius);
-    if (theme.includes('diwali') || theme.includes('gold') || theme.includes('luxury')) {
+    if (theme.includes('holi') || theme.includes('vibrant') || theme.includes('colors')) {
+      orb1Grad.addColorStop(0, 'rgba(236, 72, 153, 0.32)'); // Vibrant Magenta Gulal
+      orb1Grad.addColorStop(0.5, 'rgba(168, 85, 247, 0.14)'); // Purple
+      orb1Grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    } else if (theme.includes('diwali') || theme.includes('gold') || theme.includes('luxury')) {
       orb1Grad.addColorStop(0, 'rgba(245, 158, 11, 0.22)');
       orb1Grad.addColorStop(0.5, 'rgba(180, 83, 9, 0.08)');
       orb1Grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
@@ -218,8 +224,14 @@ export class MotionGraphicsEngine {
     const orb2X = width * 0.75 + Math.cos(time * 0.6) * (width * 0.12);
     const orb2Y = height * 0.7 + Math.sin(time * 0.75) * (height * 0.08);
     const orb2Grad = ctx.createRadialGradient(orb2X, orb2Y, 10, orb2X, orb2Y, width * 0.5);
-    orb2Grad.addColorStop(0, 'rgba(254, 240, 138, 0.1)');
-    orb2Grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    if (theme.includes('holi') || theme.includes('vibrant') || theme.includes('colors')) {
+      orb2Grad.addColorStop(0, 'rgba(6, 182, 212, 0.28)'); // Cyan / Turquoise
+      orb2Grad.addColorStop(0.5, 'rgba(250, 204, 21, 0.14)'); // Canary Yellow
+      orb2Grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    } else {
+      orb2Grad.addColorStop(0, 'rgba(254, 240, 138, 0.1)');
+      orb2Grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    }
     ctx.fillStyle = orb2Grad;
     ctx.fillRect(0, 0, width, height);
 
@@ -478,16 +490,19 @@ export class MotionGraphicsEngine {
     const pillX = (width - pillW) / 2;
     const pillY = startY - pillH - 20;
 
-    // Glass backdrop for kicker
-    ctx.fillStyle = 'rgba(245, 158, 11, 0.12)';
-    ctx.strokeStyle = 'rgba(245, 158, 11, 0.45)';
+    // Glass backdrop for kicker adapting to accentColor / theme
+    const isVibrant = rc.scene.theme?.includes('holi') || rc.scene.theme?.includes('vibrant');
+    ctx.fillStyle = isVibrant
+      ? 'rgba(236, 72, 153, 0.20)'
+      : 'rgba(245, 158, 11, 0.12)';
+    ctx.strokeStyle = accentColor;
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.roundRect(pillX, pillY, pillW, pillH, pillH / 2);
     ctx.fill();
     ctx.stroke();
 
-    ctx.fillStyle = '#FEF08A';
+    ctx.fillStyle = isVibrant ? '#FDF2F8' : '#FEF08A';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(kicker, width / 2, pillY + pillH / 2);
@@ -509,15 +524,29 @@ export class MotionGraphicsEngine {
     lines.forEach((line, index) => {
       const lineY = startY + index * lineHeight + slideOffset;
 
-      // Golden metallic linear gradient
+      // Theme-adaptive linear gradient
       const grad = ctx.createLinearGradient(width * 0.15, lineY, width * 0.85, lineY);
-      grad.addColorStop(0, '#FFFFFF');
-      grad.addColorStop(0.2, '#FEF08A');
-      grad.addColorStop(0.6, '#F59E0B');
-      grad.addColorStop(1, '#D97706');
+      if (isVibrant) {
+        grad.addColorStop(0, '#FFFFFF');
+        grad.addColorStop(0.3, '#F472B6'); // Bright Pink
+        grad.addColorStop(0.7, '#38BDF8'); // Cyan
+        grad.addColorStop(1, '#FACC15'); // Yellow
+        ctx.shadowColor = 'rgba(236, 72, 153, 0.65)';
+      } else if (rc.scene.theme?.includes('cyberpunk') || rc.scene.theme?.includes('high_tech')) {
+        grad.addColorStop(0, '#FFFFFF');
+        grad.addColorStop(0.3, '#38BDF8');
+        grad.addColorStop(0.7, '#60A5FA');
+        grad.addColorStop(1, '#1D4ED8');
+        ctx.shadowColor = 'rgba(56, 189, 248, 0.65)';
+      } else {
+        grad.addColorStop(0, '#FFFFFF');
+        grad.addColorStop(0.2, '#FEF08A');
+        grad.addColorStop(0.6, '#F59E0B');
+        grad.addColorStop(1, '#D97706');
+        ctx.shadowColor = 'rgba(245, 158, 11, 0.55)';
+      }
 
       ctx.fillStyle = grad;
-      ctx.shadowColor = 'rgba(245, 158, 11, 0.55)';
       ctx.shadowBlur = 18;
       ctx.fillText(line, width / 2, lineY);
     });
@@ -1257,6 +1286,45 @@ export class MotionGraphicsEngine {
       ctx.fillText(line, width / 2, y);
     });
 
+    ctx.restore();
+  }
+
+  // Dynamic Multicolor Powder Ambience for Holi & Spring Celebrations
+  private drawHoliAmbience(rc: RenderContext): void {
+    const { ctx, width, height, time } = rc;
+    const holiColors = ['#EC4899', '#06B6D4', '#FACC15', '#A855F7', '#10B981', '#F97316', '#FFFFFF'];
+
+    // 1. Soft expanding powder cloud blooms
+    const clouds = [
+      { x: width * 0.35 + Math.sin(time * 1.2) * 40, y: height * 0.42, color: 'rgba(236, 72, 153, 0.24)', r: width * 0.32 },
+      { x: width * 0.68 + Math.cos(time * 1.0) * 40, y: height * 0.52, color: 'rgba(6, 182, 212, 0.22)', r: width * 0.36 },
+      { x: width * 0.50 + Math.sin(time * 0.9) * 30, y: height * 0.65, color: 'rgba(250, 204, 21, 0.20)', r: width * 0.28 }
+    ];
+
+    clouds.forEach(c => {
+      const g = ctx.createRadialGradient(c.x, c.y, 10, c.x, c.y, c.r);
+      g.addColorStop(0, c.color);
+      g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // 2. Multi-color floating powder flecks
+    ctx.save();
+    for (let i = 0; i < 48; i++) {
+      const px = ((i * 37 + time * 65) % width);
+      const py = ((i * 53 + Math.sin(time * 2 + i) * 80 + height) % height);
+      const color = holiColors[i % holiColors.length];
+      const size = 3 + (i % 5);
+
+      ctx.fillStyle = color;
+      ctx.globalAlpha = 0.55 + Math.sin(time * 3 + i) * 0.3;
+      ctx.beginPath();
+      ctx.arc(px, py, size, 0, Math.PI * 2);
+      ctx.fill();
+    }
     ctx.restore();
   }
 

@@ -9,7 +9,143 @@ export interface TemplateMatch {
 }
 
 // =========================================================================
-// 1. BENCHMARK PROJECT: 15-Second Sukh Graphix Agency Showcase
+// 1. HOLI FESTIVAL OF COLORS TEMPLATE
+// =========================================================================
+export const HOLI_FESTIVE_TEMPLATE: TemplateMatch = {
+  title: 'Holi Festival of Colors Reel',
+  description: '15-second celebratory motion-graphics reel with vibrant gulal powder particles, playful spring rhythm, and festive greetings.',
+  stylePreset: 'vibrant_colors',
+  defaultBrand: {
+    name: 'HAPPY HOLI',
+    primaryColor: '#EC4899',
+    secondaryColor: '#06B6D4',
+    accentColor: '#FACC15',
+    tagline: 'Festival of Colors & Boundless Joy',
+    fontFamily: 'serif'
+  },
+  scenes: (duration: number, brand: BrandKit): Scene[] => {
+    const s1Duration = Math.round(duration * 0.33);
+    const s2Duration = Math.round(duration * 0.33);
+    const s3Duration = duration - s1Duration - s2Duration;
+
+    return [
+      {
+        id: `sc_holi_1_${Date.now()}`,
+        order: 1,
+        title: 'Colors in the Air — The Joyous Dawn',
+        label: 'SCENE 1: FESTIVE DAWN',
+        narration: 'As the spring sun rises, clouds of vibrant gulal take to the sky. Let every color wash away sorrows and awaken boundless joy.',
+        captionText: '✨ RANG BARSE ✨\nCelebrate The Festival of Colors',
+        duration: s1Duration,
+        visualType: 'motion_graphic',
+        theme: 'vibrant_colors',
+        backgroundColor: '#0F0728',
+        compositionLayout: 'split_editorial',
+        cameraMotion: 'zoom_in',
+        focalConcept: 'Vibrant Gulal Cloud with Glowing Kinetic Typography',
+        elements: [
+          {
+            id: 'elem_holi_headline',
+            type: 'kinetic_headline',
+            props: {
+              kicker: '✦ FESTIVAL OF COLORS ✦',
+              headline: 'CELEBRATE THE MAGIC OF HOLI',
+              subtitle: 'Where every color tells a story of love, laughter, and unity.',
+              accentColor: '#EC4899'
+            }
+          },
+          {
+            id: 'elem_holi_particles1',
+            type: 'particles',
+            props: { count: 60, color: '#EC4899', speed: 1.2 }
+          }
+        ],
+        assetRequirements: ['Festive Dhol rhythm intro', 'Joyful celebration cheers'],
+        assignedAssetIds: {},
+        transition: 'fade',
+        approved: false
+      },
+      {
+        id: `sc_holi_2_${Date.now()}`,
+        order: 2,
+        title: 'Laughter, Rhythm & Playful Splashes',
+        label: 'SCENE 2: CELEBRATION IN MOTION',
+        narration: 'From flying powders of pink, turquoise, and gold to rhythmic beats of the dhol, hearts dance in pure celebration.',
+        captionText: 'VIBRANT HEARTS DANCE\nLove, Laughter & Pure Celebration',
+        duration: s2Duration,
+        visualType: 'motion_graphic',
+        theme: 'vibrant_colors',
+        backgroundColor: '#160838',
+        compositionLayout: 'metric_grid',
+        cameraMotion: 'pan_drift_up',
+        focalConcept: '3-Tier Festive Highlight Cards in Vibrant Glassmorphism',
+        elements: [
+          {
+            id: 'elem_holi_grid',
+            type: 'metric_grid',
+            props: {
+              headline: 'THE SPIRIT OF HOLI',
+              items: [
+                { num: '01', title: 'Vibrant Gulal Powders', desc: 'Magenta, cyan, and sunny gold clouds' },
+                { num: '02', title: 'Dhol Beats & Dancing', desc: 'Rhythmic celebration of friendship & life' },
+                { num: '03', title: 'Sweet Festive Warmth', desc: 'Sharing gujiya and spreading happiness' }
+              ]
+            }
+          },
+          {
+            id: 'elem_holi_particles2',
+            type: 'particles',
+            props: { count: 70, color: '#06B6D4', speed: 1.4 }
+          }
+        ],
+        assetRequirements: ['Dynamic dhol drum crescendo', 'Festive song transition'],
+        assignedAssetIds: {},
+        transition: 'slide_left',
+        approved: false
+      },
+      {
+        id: `sc_holi_3_${Date.now()}`,
+        order: 3,
+        title: 'Happy Holi — Blessings & Joy',
+        label: 'SCENE 3: CLIMAX & BLESSINGS',
+        narration: 'May your life be painted with the colors of peace, prosperity, and endless joy. Happy Holi to you and your family!',
+        captionText: 'HAPPY HOLI\nWishing You Peace, Love & Endless Colors',
+        duration: s3Duration,
+        visualType: 'motion_graphic',
+        theme: 'vibrant_colors',
+        backgroundColor: '#0B0520',
+        compositionLayout: 'brand_outro',
+        cameraMotion: 'zoom_out',
+        focalConcept: 'Grand Luminous Festive Crest with Specular Sheen & Celebration Pill',
+        elements: [
+          {
+            id: 'elem_holi_outro',
+            type: 'brand_outro',
+            props: {
+              brandName: brand?.name && brand.name !== 'Sukh Graphix' ? brand.name : 'HAPPY HOLI',
+              tagline: brand?.tagline || 'May Your Life Be Painted With Endless Joy',
+              emblem: '✦',
+              cta: 'SHARE THE COLORS OF JOY →',
+              glowColor: '#EC4899'
+            }
+          },
+          {
+            id: 'elem_holi_particles3',
+            type: 'particles',
+            props: { count: 80, color: '#FACC15', speed: 1.6 }
+          }
+        ],
+        assetRequirements: ['Triumphant festive crescendo chime', 'Sparkle chime sound'],
+        assignedAssetIds: {},
+        transition: 'zoom_in',
+        approved: false
+      }
+    ];
+  }
+};
+
+// =========================================================================
+// 2. BENCHMARK PROJECT: 15-Second Sukh Graphix Agency Showcase
 // =========================================================================
 export const SUKH_GRAPHIX_BENCHMARK_TEMPLATE: TemplateMatch = {
   title: 'Sukh Graphix — Agency Showcase Masterclass',
@@ -159,7 +295,7 @@ export const SUKH_GRAPHIX_BENCHMARK_TEMPLATE: TemplateMatch = {
 };
 
 // =========================================================================
-// 2. FESTIVE DIWALI REEL TEMPLATE
+// 3. FESTIVE DIWALI REEL TEMPLATE
 // =========================================================================
 export const FESTIVE_DIWALI_TEMPLATE: TemplateMatch = {
   title: 'Diwali Festive Reel — Sukh Graphix',
@@ -301,7 +437,7 @@ export const FESTIVE_DIWALI_TEMPLATE: TemplateMatch = {
 };
 
 // =========================================================================
-// 3. SAAS PRODUCT SHOWCASE TEMPLATE
+// 4. SAAS PRODUCT SHOWCASE TEMPLATE
 // =========================================================================
 export const SAAS_PRODUCT_TEMPLATE: TemplateMatch = {
   title: 'Next-Gen Product Showcase',
@@ -429,43 +565,60 @@ export const SAAS_PRODUCT_TEMPLATE: TemplateMatch = {
 };
 
 // =========================================================================
-// 4. BESPOKE DYNAMIC 3-ACT GENERATOR (FOR ANY USER PROMPT)
+// 5. BESPOKE DYNAMIC 3-ACT GENERATOR (FOR ANY USER PROMPT)
 // =========================================================================
 export function generateDynamicBespokeScenes(prompt: string, duration: number, brand: BrandKit): Scene[] {
   const p = prompt.toLowerCase();
   const sDuration = Math.round(duration / 3);
 
+  const isHoli = p.includes('holi') || p.includes('gulal') || p.includes('rang barse') || p.includes('colors');
+  const isDiwali = p.includes('diwali') || p.includes('deepavali') || p.includes('diya');
+  const isFitness = p.includes('gym') || p.includes('fitness') || p.includes('workout') || p.includes('sport');
+  const isTech = p.includes('tech') || p.includes('ai') || p.includes('crypto') || p.includes('future') || p.includes('cyber');
+
   // Determine dynamic aesthetic
-  let theme: 'luxury_gold' | 'high_tech' | 'cyberpunk' | 'minimalist' = 'luxury_gold';
+  let theme: string = 'luxury_gold';
   let bg1 = '#0B0F19';
   let bg2 = '#080E1C';
   let bg3 = '#0D0801';
   let particleColor = '#F59E0B';
 
-  if (p.includes('gym') || p.includes('fitness') || p.includes('workout') || p.includes('sport')) {
+  if (isHoli) {
+    theme = 'vibrant_colors';
+    bg1 = '#0F0728';
+    bg2 = '#160838';
+    bg3 = '#0B0520';
+    particleColor = '#EC4899';
+  } else if (isDiwali) {
+    theme = 'diwali_festive';
+    bg1 = '#1E1100';
+    bg2 = '#140A02';
+    bg3 = '#0A0500';
+    particleColor = '#F59E0B';
+  } else if (isFitness) {
     theme = 'high_tech';
     bg1 = '#090E17';
     bg2 = '#061622';
     bg3 = '#050D16';
     particleColor = '#10B981';
-  } else if (p.includes('tech') || p.includes('ai') || p.includes('crypto') || p.includes('future') || p.includes('cyber')) {
+  } else if (isTech) {
     theme = 'cyberpunk';
     bg1 = '#0A0E1A';
     bg2 = '#081226';
     bg3 = '#060B18';
     particleColor = '#38BDF8';
-  } else if (p.includes('minimal') || p.includes('clean') || p.includes('book') || p.includes('art')) {
-    theme = 'minimalist';
-    bg1 = '#0E1116';
-    bg2 = '#121720';
-    bg3 = '#0A0C10';
-    particleColor = '#CBD5E1';
   }
 
-  // Extract clean words
+  // Extract clean words from prompt
   const cleanTitle = prompt.length > 32 ? prompt.slice(0, 30) + '...' : prompt;
-  const brandName = brand?.name ? brand.name : 'CREATOR STUDIO';
-  const brandTagline = brand?.tagline ? brand.tagline : 'Crafted For Modern Creators';
+  const brandName = brand?.name ? brand.name : (isHoli ? 'HAPPY HOLI' : 'CREATOR STUDIO');
+  const brandTagline = brand?.tagline ? brand.tagline : (isHoli ? 'Festival of Colors & Boundless Joy' : 'Crafted For Modern Creators');
+
+  // Derive 3 contextual highlight points from prompt
+  const pWords = prompt.split(/\s+/).filter(w => w.length > 3);
+  const w1 = pWords[0] || 'Energy';
+  const w2 = pWords[1] || 'Passion';
+  const w3 = pWords[2] || 'Excellence';
 
   return [
     {
@@ -473,8 +626,8 @@ export function generateDynamicBespokeScenes(prompt: string, duration: number, b
       order: 1,
       title: `The Hook: ${cleanTitle}`,
       label: 'SCENE 1: HOOK',
-      narration: `Are you ready to experience the next level? Here is why ${cleanTitle} changes everything.`,
-      captionText: `⚡ ${cleanTitle.toUpperCase()} ⚡\nThe Next Level Starts Here`,
+      narration: `Are you ready to experience the unforgettable? Here is why ${cleanTitle} captures hearts.`,
+      captionText: `⚡ ${cleanTitle.toUpperCase()} ⚡\nThe Experience Begins`,
       duration: sDuration,
       visualType: 'motion_graphic',
       theme,
@@ -487,9 +640,9 @@ export function generateDynamicBespokeScenes(prompt: string, duration: number, b
           id: 'elem_dyn_headline',
           type: 'kinetic_headline',
           props: {
-            kicker: `✦ 01 // ${brandName.toUpperCase()}`,
+            kicker: `✦ ${brandName.toUpperCase()} ✦`,
             headline: cleanTitle.toUpperCase(),
-            subtitle: 'Engineered for maximum retention and visual authority.',
+            subtitle: 'Engineered for maximum visual authority and unforgettable impact.',
             accentColor: particleColor
           }
         },
@@ -507,10 +660,10 @@ export function generateDynamicBespokeScenes(prompt: string, duration: number, b
     {
       id: `sc_dyn_2_${Date.now()}`,
       order: 2,
-      title: 'Value Proposition & Core Message',
+      title: 'Core Highlights & Experience',
       label: 'SCENE 2: VALUE & PROOF',
-      narration: `Engineered without compromise. Unstoppable momentum, high performance, and dynamic results.`,
-      captionText: `UNSTOPPABLE RESULTS\nBuilt For High Impact`,
+      narration: `Crafted with intention and deep resonance. Dynamic rhythm, vibrant emotion, and unforgettable results.`,
+      captionText: `UNSTOPPABLE ENERGY\nCrafted For Maximum Resonance`,
       duration: sDuration,
       visualType: 'motion_graphic',
       theme,
@@ -523,11 +676,11 @@ export function generateDynamicBespokeScenes(prompt: string, duration: number, b
           id: 'elem_dyn_grid',
           type: 'metric_grid',
           props: {
-            headline: 'KEY ADVANTAGES',
+            headline: 'KEY EXPERIENCES',
             items: [
-              { num: '01', title: 'Precision Craft', desc: 'Meticulously crafted for perfection' },
-              { num: '02', title: 'Dynamic Speed', desc: 'Instant 60fps execution and delivery' },
-              { num: '03', title: 'Proven Authority', desc: 'Engineered to stand out and scale' }
+              { num: '01', title: `${w1.toUpperCase()} In Motion`, desc: 'Dynamic visual energy and rhythm' },
+              { num: '02', title: `${w2.toUpperCase()} & Connection`, desc: 'Bonds forged through shared experience' },
+              { num: '03', title: `${w3.toUpperCase()} & Joy`, desc: 'Unforgettable moments of celebration' }
             ]
           }
         },
@@ -547,7 +700,7 @@ export function generateDynamicBespokeScenes(prompt: string, duration: number, b
       order: 3,
       title: `Grand Finale & Call To Action`,
       label: 'SCENE 3: BRAND FINALE',
-      narration: `Take action today. Connect with ${brandName} and elevate your game.`,
+      narration: `Celebrate the moment. Join in and elevate your experience today.`,
       captionText: `${brandName.toUpperCase()}\n${brandTagline}`,
       duration: duration - (sDuration * 2),
       visualType: 'motion_graphic',
@@ -564,7 +717,7 @@ export function generateDynamicBespokeScenes(prompt: string, duration: number, b
             brandName: brandName,
             tagline: brandTagline,
             emblem: brandName.slice(0, 2).toUpperCase(),
-            cta: 'WORK WITH US →',
+            cta: 'JOIN THE CELEBRATION →',
             glowColor: particleColor
           }
         },
@@ -585,21 +738,26 @@ export function generateDynamicBespokeScenes(prompt: string, duration: number, b
 export function matchOfflineTemplate(prompt: string, duration: number, brand: BrandKit): Scene[] {
   const p = prompt.toLowerCase();
 
-  // 1. Diwali Festive Celebration (explicit match for festive prompts)
+  // 1. Holi Festival of Colors
+  if (p.includes('holi') || p.includes('gulal') || p.includes('rang barse') || p.includes('festival of colors') || p.includes('colors festival')) {
+    return HOLI_FESTIVE_TEMPLATE.scenes(duration, brand);
+  }
+
+  // 2. Diwali Festive Celebration (explicit match for festive prompts)
   if (p.includes('diwali') || p.includes('deepavali') || p.includes('diya')) {
     return FESTIVE_DIWALI_TEMPLATE.scenes(duration, brand);
   }
 
-  // 2. SaaS & Product Teaser
+  // 3. SaaS & Product Teaser
   if (p.includes('saas') || p.includes('software') || p.includes('dashboard') || p.includes('automation')) {
     return SAAS_PRODUCT_TEMPLATE.scenes(duration, brand);
   }
 
-  // 3. Sukh Graphix Agency Benchmark (Directive #8)
+  // 4. Sukh Graphix Agency Benchmark (Directive #8)
   if (p.includes('sukh') || p.includes('graphix') || p.includes('graphic') || p.includes('agency') || p.includes('portfolio') || p.includes('design studio')) {
     return SUKH_GRAPHIX_BENCHMARK_TEMPLATE.scenes(duration, brand);
   }
 
-  // 4. Fallback: Bespoke 3-Act Motion Graphics sequence tailored to prompt
+  // 5. Fallback: Bespoke 3-Act Motion Graphics sequence tailored to prompt
   return generateDynamicBespokeScenes(prompt, duration, brand);
 }

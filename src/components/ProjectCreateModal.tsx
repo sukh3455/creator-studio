@@ -36,7 +36,7 @@ export const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
   const [prompt, setPrompt] = useState<string>(initialPrompt || '');
   const [duration, setDuration] = useState<number>(15);
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('9:16');
-  const [stylePreset, setStylePreset] = useState<StylePreset>('cyberpunk');
+  const [stylePreset, setStylePreset] = useState<StylePreset>('auto');
 
   // Brand Kit (defaults to empty/generic, not hardcoded Diwali)
   const [brandName, setBrandName] = useState<string>('');
@@ -195,10 +195,17 @@ export const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
 
           {/* Style Preset Selector */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-slate-200">Motion Graphics Style</label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-slate-200">Motion Graphics Style</label>
+              <span className="text-[11px] text-amber-400 font-medium">
+                {stylePreset === 'auto' ? 'Auto-adapts color & vibe to your prompt' : ''}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {[
-                { id: 'festive', label: 'Festive Luxury', icon: Flame },
+                { id: 'auto', label: '✦ Auto / AI Directed', icon: Sparkles },
+                { id: 'vibrant_colors', label: 'Vibrant Colors (Holi)', icon: Palette },
+                { id: 'festive', label: 'Festive Gold (Diwali)', icon: Flame },
                 { id: 'cyberpunk', label: 'Cyberpunk Neon', icon: Sparkles },
                 { id: 'corporate', label: 'Corporate Clean', icon: Layers },
                 { id: 'luxury_gold', label: 'Golden Sheen', icon: Palette }
@@ -240,14 +247,31 @@ export const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
             {showBrandKit && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3 pt-3 border-t border-slate-800">
                 <div className="space-y-1">
-                  <label className="text-[11px] text-slate-400">Brand / Client Name</label>
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] text-slate-400">Brand / Client Name</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBrandName('Sukh Graphix');
+                        setTagline('Illuminating Creative Excellence');
+                        setPrimaryColor('#F59E0B');
+                        setSecondaryColor('#B45309');
+                      }}
+                      className="text-[10px] text-amber-400 hover:text-amber-300 underline"
+                    >
+                      Fill Sukh Graphix
+                    </button>
+                  </div>
                   <input
                     type="text"
                     value={brandName}
-                    placeholder="e.g. Acme Studio"
+                    placeholder="e.g. Acme Studio (Leave empty for generic celebration)"
                     onChange={(e) => setBrandName(e.target.value)}
                     className="w-full px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs placeholder-slate-600"
                   />
+                  <p className="text-[10px] text-slate-500">
+                    Leave blank to auto-derive festive titles (e.g. "Happy Holi").
+                  </p>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[11px] text-slate-400">Tagline / Motto</label>
