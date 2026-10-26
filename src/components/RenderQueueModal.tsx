@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, 
   Film, 
@@ -11,7 +11,8 @@ import {
   RefreshCw,
   Clock,
   ExternalLink,
-  ShieldCheck
+  ShieldCheck,
+  Share2
 } from 'lucide-react';
 
 const GithubIcon = ({ className = "w-3.5 h-3.5" }: { className?: string }) => (
@@ -46,14 +47,20 @@ export const RenderQueueModal: React.FC<RenderQueueModalProps> = ({
   onUpdateRenderJob,
   onGoToStoryboard
 }) => {
-  const [target, setTarget] = useState<RenderTarget>('github_actions');
-  const [selectedDuration, setSelectedDuration] = useState<number>(project.duration || 30);
+  // Default to fast, reliable, 100% on-device browser rendering
+  const [target, setTarget] = useState<RenderTarget>('browser');
+  const [selectedDuration, setSelectedDuration] = useState<number>(project.duration || 15);
   const [isRendering, setIsRendering] = useState<boolean>(false);
   const [currentProgress, setCurrentProgress] = useState<number>(0);
   const [renderLogs, setRenderLogs] = useState<string[]>([]);
   const [completedDownloadUrl, setCompletedDownloadUrl] = useState<string | null>(null);
+  const [renderedBlob, setRenderedBlob] = useState<Blob | null>(null);
+  const [activeOutputFormat, setActiveOutputFormat] = useState<'webm' | 'mp4'>('webm');
+  const [workflowRunUrl, setWorkflowRunUrl] = useState<string | null>(null);
   const [activeJobRecord, setActiveJobRecord] = useState<RenderJob | null>(null);
   const [securityErrors, setSecurityErrors] = useState<string[]>([]);
+
+  const renderCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   if (!isOpen) return null;
 
@@ -96,6 +103,8 @@ export const RenderQueueModal: React.FC<RenderQueueModalProps> = ({
     setIsRendering(true);
     setCurrentProgress(5);
     setCompletedDownloadUrl(null);
+    setRenderedBlob(null);
+    setWorkflowRunUrl(null);
     setRenderLogs(newJob.logs);
     setActiveJobRecord(newJob);
     await onSaveRenderJob(newJob);
@@ -121,12 +130,19 @@ export const RenderQueueModal: React.FC<RenderQueueModalProps> = ({
     try {
       const dispatchResponse = await provider.submitRenderJob(request);
       setRenderLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${dispatchResponse.message}`]);
+      if (dispatchResponse.workflowUrl) {
+        setWorkflowRunUrl(dispatchResponse.workflowUrl);
+      }
 
       // Poll status every 800ms
       const pollInterval = setInterval(async () => {
         try {
           const statusRes = await provider.getRenderJobStatus(jobId, project.id);
           setCurrentProgress(statusRes.progress);
+
+          if (statusRes.workflowUrl) {
+            setWorkflowRunUrl(statusRes.workflowUrl);
+          }
 
           if (statusRes.logs && statusRes.logs.length > 0) {
             setRenderLogs(statusRes.logs);
@@ -135,7 +151,9 @@ export const RenderQueueModal: React.FC<RenderQueueModalProps> = ({
           if (statusRes.status === 'completed') {
             clearInterval(pollInterval);
             setIsRendering(false);
-            setCompletedDownloadUrl(statusRes.outputUrl || `https://storage.example.com/renders/${jobId}.mp4`);
+            // Only set completedDownloadUrl if real cloud URL exists; NEVER use fake .local domain
+            setCompletedDownloadUrl(statusRes.outputUrl || null);
+            setActiveOutputFormat('mp4');
             await onUpdateRenderJob(jobId, {
               status: 'completed',
               progress: 100,
@@ -176,34 +194,57 @@ export const RenderQueueModal: React.FC<RenderQueueModalProps> = ({
     }
   };
 
-  // Browser MediaRecorder Execution
+  // Browser MediaRecorder Execution on DOM-attached Canvas
   const executeBrowserRender = async (jobId: string, job: RenderJob) => {
     try {
-      const offscreenCanvas = document.createElement('canvas');
-      offscreenCanvas.width = resolution.width;
-      offscreenCanvas.height = resolution.height;
-      const ctx = offscreenCanvas.getContext('2d');
+      const canvas = renderCanvasRef.current;
+      if (!canvas) throw new Error('Render monitor canvas not initialized');
+      canvas.width = resolution.width;
+      canvas.height = resolution.height;
+      const ctx = canvas.getContext('2d', { alpha: false });
       if (!ctx) throw new Error('Could not get 2D canvas context');
 
-      const stream = offscreenCanvas.captureStream(30);
       let mimeType = 'video/webm;codecs=vp9';
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = 'video/webm';
+      let format: 'webm' | 'mp4' = 'webm';
+
+      if (typeof MediaRecorder !== 'undefined') {
+        if (MediaRecorder.isTypeSupported('video/mp4;codecs=avc1')) {
+          mimeType = 'video/mp4;codecs=avc1';
+          format = 'mp4';
+        } else if (MediaRecorder.isTypeSupported('video/mp4')) {
+          mimeType = 'video/mp4';
+          format = 'mp4';
+        } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
+          mimeType = 'video/webm;codecs=vp9';
+          format = 'webm';
+        } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8')) {
+          mimeType = 'video/webm;codecs=vp8';
+          format = 'webm';
+        } else if (MediaRecorder.isTypeSupported('video/webm')) {
+          mimeType = 'video/webm';
+          format = 'webm';
+        }
       }
 
-      const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 6000000 });
+      setActiveOutputFormat(format);
+
+      const stream = canvas.captureStream(30);
+      const recorder = new MediaRecorder(stream, { 
+        mimeType, 
+        videoBitsPerSecond: 6000000 
+      });
       const chunks: Blob[] = [];
 
       recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunks.push(e.data);
+        if (e.data && e.data.size > 0) chunks.push(e.data);
       };
 
       const engine = new MotionGraphicsEngine();
       const duration = selectedDuration;
       const scenes = project.scenes || [];
 
-      recorder.start();
-      setRenderLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] Local MediaRecorder started (${mimeType})`]);
+      recorder.start(100);
+      setRenderLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] Local MediaRecorder initialized (${mimeType})`]);
 
       const fps = 30;
       const totalFrames = duration * fps;
@@ -243,26 +284,28 @@ export const RenderQueueModal: React.FC<RenderQueueModalProps> = ({
         });
 
         frame++;
-        const pct = Math.round((frame / totalFrames) * 90);
+        const pct = Math.round((frame / totalFrames) * 95);
         setCurrentProgress(pct);
 
-        if (frame % (fps * 5) === 0) {
+        if (frame % (fps * 4) === 0) {
           setRenderLogs(prev => [
             ...prev,
-            `[${new Date().toLocaleTimeString()}] Rendered ${Math.round(currentTime)}s of ${duration}s (${pct}%)`
+            `[${new Date().toLocaleTimeString()}] Synthesized frame ${frame}/${totalFrames} (${pct}%)`
           ]);
         }
       }, 1000 / fps);
 
       recorder.onstop = async () => {
-        const videoBlob = new Blob(chunks, { type: 'video/webm' });
+        const videoBlob = new Blob(chunks, { type: mimeType });
+        setRenderedBlob(videoBlob);
         const videoUrl = URL.createObjectURL(videoBlob);
         setCompletedDownloadUrl(videoUrl);
         setCurrentProgress(100);
         setIsRendering(false);
+        const mb = (videoBlob.size / 1024 / 1024).toFixed(2);
         setRenderLogs(prev => [
           ...prev,
-          `[${new Date().toLocaleTimeString()}] Render completed! Video size: ${(videoBlob.size / 1024 / 1024).toFixed(2)} MB`
+          `[${new Date().toLocaleTimeString()}] Video synthesis complete! Size: ${mb} MB (${format.toUpperCase()})`
         ]);
 
         await onUpdateRenderJob(jobId, {
@@ -280,6 +323,18 @@ export const RenderQueueModal: React.FC<RenderQueueModalProps> = ({
         error: err.message
       });
     }
+  };
+
+  // Safe Direct Download Handler
+  const handleDownloadFile = () => {
+    if (!completedDownloadUrl) return;
+    const a = document.createElement('a');
+    a.href = completedDownloadUrl;
+    const ext = activeOutputFormat || (target === 'browser' ? 'webm' : 'mp4');
+    a.download = `${project.title.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${selectedDuration}s.${ext}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
   return (
@@ -347,32 +402,7 @@ export const RenderQueueModal: React.FC<RenderQueueModalProps> = ({
         <div className="space-y-3">
           <label className="text-xs font-semibold text-slate-300">Choose Rendering Engine</label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {/* 1. GitHub Actions (Primary Free Cloud Backend) */}
-            <button
-              type="button"
-              disabled={!isApproved}
-              onClick={() => setTarget('github_actions')}
-              className={`p-3.5 rounded-xl border text-left flex flex-col justify-between space-y-2 transition-all ${
-                target === 'github_actions'
-                  ? 'bg-amber-500/10 border-amber-500 text-white'
-                  : 'bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-900'
-              } ${!isApproved ? 'opacity-40 cursor-not-allowed' : ''}`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-white flex items-center space-x-1.5">
-                  <Github className="w-3.5 h-3.5 text-amber-400" />
-                  <span>GitHub Actions</span>
-                </span>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  Free • 2000m
-                </span>
-              </div>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Ephemeral Ubuntu cloud runner. Renders 1080x1920 MP4 even with your laptop turned off.
-              </p>
-            </button>
-
-            {/* 2. Browser Local Canvas */}
+            {/* 1. Browser Local Canvas (Primary Fast & Free On-Device Backend) */}
             <button
               type="button"
               disabled={!isApproved}
@@ -386,14 +416,39 @@ export const RenderQueueModal: React.FC<RenderQueueModalProps> = ({
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-white flex items-center space-x-1.5">
                   <Play className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Local Browser</span>
+                  <span>Local Device Engine</span>
                 </span>
                 <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                  Instant • 0s
+                  Instant • Direct File
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 leading-relaxed">
-                Direct on-device MediaRecorder recording. Fast, private, and 100% free without external network.
+                Direct on-device HTML5 canvas rendering. Saves directly to your device without external cloud or black screens.
+              </p>
+            </button>
+
+            {/* 2. GitHub Actions Cloud Runner */}
+            <button
+              type="button"
+              disabled={!isApproved}
+              onClick={() => setTarget('github_actions')}
+              className={`p-3.5 rounded-xl border text-left flex flex-col justify-between space-y-2 transition-all ${
+                target === 'github_actions'
+                  ? 'bg-amber-500/10 border-amber-500 text-white'
+                  : 'bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-900'
+              } ${!isApproved ? 'opacity-40 cursor-not-allowed' : ''}`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-white flex items-center space-x-1.5">
+                  <GithubIcon className="w-3.5 h-3.5 text-amber-400" />
+                  <span>GitHub Actions</span>
+                </span>
+                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  Cloud • FFmpeg
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Renders on Ubuntu cloud runner with FFmpeg. Saves to GitHub Artifacts (or Cloudflare R2 if configured).
               </p>
             </button>
 
@@ -424,7 +479,7 @@ export const RenderQueueModal: React.FC<RenderQueueModalProps> = ({
         <div className="space-y-2">
           <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
             <span>Video Duration</span>
-            <span className="text-[11px] text-amber-400 font-normal">Supports 30s & 60s professional reels</span>
+            <span className="text-[11px] text-amber-400 font-normal">Supports 15s, 30s & 60s professional reels</span>
           </label>
           <div className="grid grid-cols-4 gap-2">
             {[
@@ -467,11 +522,34 @@ export const RenderQueueModal: React.FC<RenderQueueModalProps> = ({
               <>
                 <Film className="w-4 h-4 stroke-[2.5]" />
                 <span>
-                  Render Video ({selectedDuration}s • {resolution.width}x{resolution.height} @ 30 FPS • {target === 'github_actions' ? 'GitHub Cloud' : 'Local'})
+                  Render Video ({selectedDuration}s • {resolution.width}x{resolution.height} @ 30 FPS • {target === 'github_actions' ? 'GitHub Cloud' : 'Local Device Engine'})
                 </span>
               </>
             )}
           </button>
+        </div>
+
+        {/* Live Canvas Monitor while rendering */}
+        <div className={`p-4 rounded-xl bg-slate-950 border border-slate-800 flex flex-col items-center justify-center space-y-2 ${isRendering && target === 'browser' ? 'flex' : 'hidden'}`}>
+          <div className="flex items-center space-x-1.5 text-xs font-semibold text-amber-400">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+            <span>Live Video Synthesis in Progress ({currentProgress}%)</span>
+          </div>
+          <div 
+            className="relative rounded-lg overflow-hidden bg-black border border-slate-800 shadow-xl flex items-center justify-center"
+            style={{
+              width: project.aspectRatio === '9:16' ? '160px' : project.aspectRatio === '1:1' ? '200px' : '260px',
+              maxWidth: '100%',
+              aspectRatio: project.aspectRatio === '9:16' ? '9/16' : project.aspectRatio === '1:1' ? '1/1' : '16/9'
+            }}
+          >
+            <canvas
+              ref={renderCanvasRef}
+              width={resolution.width}
+              height={resolution.height}
+              className="w-full h-full object-contain"
+            />
+          </div>
         </div>
 
         {/* Progress Bar & Real-time Console */}
@@ -481,7 +559,7 @@ export const RenderQueueModal: React.FC<RenderQueueModalProps> = ({
               <span className="flex items-center space-x-1.5">
                 <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
                 <span>
-                  {target === 'github_actions' ? 'GitHub Actions Cloud Runner Active' : 'Rendering Canvas Frames'}
+                  {target === 'github_actions' ? 'GitHub Actions Cloud Runner Active' : 'Synthesizing Video Frames'}
                 </span>
               </span>
               <span className="font-mono font-bold text-amber-400">{currentProgress}%</span>
@@ -495,26 +573,84 @@ export const RenderQueueModal: React.FC<RenderQueueModalProps> = ({
           </div>
         )}
 
-        {/* Completed Download Callout */}
+        {/* Completed Download Callout with In-Modal Video Player */}
         {completedDownloadUrl && (
-          <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/40 flex items-center justify-between gap-4">
-            <div className="flex items-center space-x-3">
-              <CheckCircle2 className="w-6 h-6 text-emerald-400 shrink-0" />
-              <div>
-                <h4 className="text-xs font-bold text-white">Video Render Complete!</h4>
-                <p className="text-[11px] text-slate-300">
-                  Verified output ready for download. Format: {target === 'browser' ? 'WebM (VP9)' : 'MP4 (H.264 / AAC)'}.
-                </p>
+          <div className="p-4 sm:p-5 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2.5">
+                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                <div>
+                  <h4 className="text-xs font-bold text-white">Video Render Complete!</h4>
+                  <p className="text-[11px] text-slate-300">
+                    Verified output ready for download. Format: {activeOutputFormat.toUpperCase()} ({resolution.width}x{resolution.height}).
+                  </p>
+                </div>
               </div>
+              {renderedBlob && (
+                <span className="text-[11px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                  {(renderedBlob.size / 1024 / 1024).toFixed(2)} MB
+                </span>
+              )}
             </div>
-            <a
-              href={completedDownloadUrl}
-              download={`${project.title.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${selectedDuration}s.${target === 'browser' ? 'webm' : 'mp4'}`}
-              className="flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs shadow-md transition-all shrink-0"
-            >
-              <Download className="w-4 h-4" />
-              <span>Download MP4</span>
-            </a>
+
+            {/* In-Modal Video Player */}
+            <div className="relative rounded-xl overflow-hidden bg-black border border-slate-800 flex items-center justify-center max-h-72">
+              <video
+                src={completedDownloadUrl}
+                controls
+                autoPlay
+                loop
+                playsInline
+                className="max-h-72 w-auto object-contain rounded-lg shadow-xl"
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center gap-2.5 pt-1">
+              <button
+                type="button"
+                onClick={handleDownloadFile}
+                className="w-full sm:flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2 transition-all active:scale-95 cursor-pointer"
+              >
+                <Download className="w-4 h-4 stroke-[2.5]" />
+                <span>Save Video to Device ({activeOutputFormat.toUpperCase()})</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Cloud Actions Succeeded Without R2 */}
+        {!completedDownloadUrl && !isRendering && activeJobRecord?.status === 'completed' && activeJobRecord?.target === 'github_actions' && (
+          <div className="p-4 rounded-xl bg-amber-950/40 border border-amber-500/40 space-y-3">
+            <div className="flex items-center space-x-2 text-amber-300 font-bold text-xs">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>GitHub Actions Workflow Completed Successfully</span>
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              The video was rendered on GitHub's Ubuntu cloud runner! However, <strong>Cloudflare R2 Storage</strong> is not configured yet. Without R2 to host public MP4 download links, GitHub stores the video as a <strong>GitHub Actions Artifact</strong> on your workflow run.
+            </p>
+            <div className="flex flex-wrap gap-2.5 pt-1">
+              <a
+                href={workflowRunUrl || `https://github.com/${settings.githubOwner}/${settings.githubRepo}/actions`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold flex items-center space-x-1.5 transition-colors"
+              >
+                <GithubIcon className="w-3.5 h-3.5 text-amber-400" />
+                <span>View GitHub Run & Download Artifact</span>
+                <ExternalLink className="w-3 h-3 text-slate-400" />
+              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  setTarget('browser');
+                  handleStartRender();
+                }}
+                className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center space-x-1.5 transition-colors cursor-pointer"
+              >
+                <Play className="w-3.5 h-3.5 fill-slate-950" />
+                <span>Download Now via Local Device Engine</span>
+              </button>
+            </div>
           </div>
         )}
 

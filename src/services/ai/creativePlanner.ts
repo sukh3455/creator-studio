@@ -93,30 +93,97 @@ Break this into 3 high-impact scenes that perfectly fit the ${duration}-second d
         }
       );
 
-      // Clean potential JSON markdown fence
-      let cleaned = responseText.trim();
-      if (cleaned.startsWith('```json')) cleaned = cleaned.replace(/^```json/, '').replace(/```$/, '').trim();
-      else if (cleaned.startsWith('```')) cleaned = cleaned.replace(/^```/, '').replace(/```$/, '').trim();
+      // Robust JSON extraction from LLM response (handling thoughts, markdown fences, preambles)
+      let cleaned = responseText.replace(/<thought>[\s\S]*?<\/thought>/gi, '').trim();
+      const codeFence = cleaned.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (codeFence && codeFence[1]) {
+        cleaned = codeFence[1].trim();
+      }
+      const bracketMatch = cleaned.match(/\{[\s\S]*\}/);
+      if (bracketMatch) {
+        cleaned = bracketMatch[0].trim();
+      }
 
       const parsed = JSON.parse(cleaned);
+      const rawScenes = parsed.scenes || parsed.storyboard || parsed.scenesList || [];
 
-      const scenes: Scene[] = (parsed.scenes || []).map((s: any, idx: number) => ({
-        id: `sc_${Date.now()}_${idx + 1}`,
-        order: s.order || idx + 1,
-        title: s.title || `Scene ${idx + 1}`,
-        label: s.label || `SCENE ${idx + 1}`,
-        narration: s.narration || '',
-        captionText: s.captionText || s.title || '',
-        duration: Number(s.duration) || Math.round(duration / 3),
-        visualType: s.visualType || 'motion_graphic',
-        theme: s.theme || 'luxury_gold',
-        backgroundColor: s.backgroundColor || '#0F0902',
-        elements: s.elements || [],
-        assetRequirements: s.assetRequirements || [],
-        assignedAssetIds: {},
-        transition: s.transition || 'fade',
-        approved: false
-      }));
+      const scenes: Scene[] = rawScenes.map((s: any, idx: number) => {
+        const title = s.title || s.label || s.sceneName || `Scene ${idx + 1}`;
+        const narration = s.narration || s.audio || s.speech || s.voiceover || s.script || s.description || '';
+        const captionText = s.captionText || s.caption || s.text || title;
+        const sceneDuration = Number(s.duration) || Math.round(duration / Math.max(1, rawScenes.length));
+        
+        // Theme detection
+        const pLower = (prompt + ' ' + title).toLowerCase();
+        let theme: any = s.theme || 'luxury_gold';
+        let particleColor = '#F59E0B';
+        if (pLower.includes('gym') || pLower.includes('fitness') || pLower.includes('sport')) {
+          theme = 'high_tech';
+          particleColor = '#10B981';
+        } else if (pLower.includes('tech') || pLower.includes('ai') || pLower.includes('cyber')) {
+          theme = 'cyberpunk';
+          particleColor = '#38BDF8';
+        }
+
+        // Guarantee rich visual elements so canvas is never black
+        let elements = s.elements;
+        if (!elements || !Array.isArray(elements) || elements.length === 0) {
+          elements = [
+            {
+              id: `elem_p_${idx}_${Date.now()}`,
+              type: 'particles',
+              props: { count: 60, color: particleColor, speed: 1.2, style: idx === 2 ? 'confetti' : 'ember_sparks' }
+            },
+            {
+              id: `elem_t_${idx}_${Date.now()}`,
+              type: 'typography',
+              props: {
+                text: captionText.toUpperCase(),
+                subtitle: narration.slice(0, 45) || 'Watch Till The End',
+                style: theme === 'high_tech' ? 'neon_cyan' : 'festive_gold'
+              }
+            }
+          ];
+
+          if (idx === 0) {
+            elements.push({
+              id: `elem_g_${idx}`,
+              type: 'geometric',
+              props: { shape: 'badge', color: particleColor, pulse: true }
+            });
+          } else if (idx === rawScenes.length - 1) {
+            elements.push({
+              id: `elem_b_${idx}`,
+              type: 'brand_reveal',
+              props: {
+                brandName: defaultBrand.name,
+                tagline: defaultBrand.tagline,
+                glowColor: particleColor,
+                lensSweep: true,
+                particleExplosion: true
+              }
+            });
+          }
+        }
+
+        return {
+          id: `sc_${Date.now()}_${idx + 1}`,
+          order: s.order || idx + 1,
+          title,
+          label: s.label || `SCENE ${idx + 1}`,
+          narration,
+          captionText,
+          duration: sceneDuration,
+          visualType: 'motion_graphic',
+          theme,
+          backgroundColor: s.backgroundColor || (theme === 'high_tech' ? '#090D16' : '#0B0F19'),
+          elements,
+          assetRequirements: s.assetRequirements || [],
+          assignedAssetIds: {},
+          transition: s.transition || (idx === 0 ? 'fade' : idx === 1 ? 'slide_left' : 'zoom_in'),
+          approved: false
+        };
+      });
 
       // Validate durations
       let totalDuration = scenes.reduce((acc, s) => acc + s.duration, 0);
@@ -126,14 +193,14 @@ Break this into 3 high-impact scenes that perfectly fit the ${duration}-second d
 
       const project: Project = {
         id: `proj_${Date.now()}`,
-        title: parsed.title || prompt.slice(0, 35),
+        title: parsed.title || parsed.concept || prompt.slice(0, 35),
         prompt,
         description: parsed.description || prompt,
         duration,
         aspectRatio,
         stylePreset: (parsed.stylePreset as StylePreset) || stylePreset,
         brandKit: parsed.brandKit || defaultBrand,
-        scenes,
+        scenes: scenes.length > 0 ? scenes : matchOfflineTemplate(prompt, duration, defaultBrand),
         status: 'planned',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -141,8 +208,8 @@ Break this into 3 high-impact scenes that perfectly fit the ${duration}-second d
 
       return { project, usedAi: true };
     } catch (err: any) {
-      console.warn('OpenRouter creative planning error, falling back to deterministic template:', err);
-      // Fall through to offline template
+      console.warn('OpenRouter creative planning error, falling back to dynamic generator:', err);
+      // Fall through to dynamic generator
     }
   }
 

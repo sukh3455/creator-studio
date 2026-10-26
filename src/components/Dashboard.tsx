@@ -41,67 +41,57 @@ export const Dashboard: React.FC<DashboardProps> = ({
 }) => {
   const providerStatuses = validateProviderStatuses(settings);
 
-  const QUICK_TEMPLATES = [
-    {
-      title: 'Diwali Festive Reel — Sukh Graphix',
-      prompt: 'Create a premium 15-second Diwali Reel for Sukh Graphix with elegant typography, custom animated diyas, glowing particles, festive music and a polished brand reveal.',
-      duration: '15s',
-      format: '9:16 Vertical',
-      icon: Flame,
-      gradient: 'from-amber-500/20 via-orange-500/20 to-yellow-500/10',
-      badge: 'Festive Luxury'
-    },
-    {
-      title: 'SaaS Intelligent Automation Showcase',
-      prompt: 'Create a dynamic 15-second mobile-first SaaS product teaser showcasing ultra-fast workflow automation, phone device mockup, cyber neon aesthetics, and a high-converting free trial CTA.',
-      duration: '15s',
-      format: '9:16 Vertical',
-      icon: Zap,
-      gradient: 'from-blue-500/20 via-cyan-500/20 to-indigo-500/10',
-      badge: 'High-Tech SaaS'
-    },
-    {
-      title: 'Compounding Snowball Avalanche',
-      prompt: 'Create a viral 15-second financial education reel explaining how compound interest starts quietly like a small snowball on an alpine slope before becoming an unstoppable wealth avalanche.',
-      duration: '15s',
-      format: '9:16 Vertical',
-      icon: TrendingUp,
-      gradient: 'from-emerald-500/20 via-teal-500/20 to-green-500/10',
-      badge: 'Finance & Growth'
-    }
-  ];
+  const [heroPrompt, setHeroPrompt] = useState<string>('');
+
+  const handleHeroSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!heroPrompt.trim()) return;
+    onUseTemplate(heroPrompt.trim());
+  };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
-      {/* Hero Welcome Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-amber-950/40 to-slate-900 border border-amber-500/20 p-6 sm:p-8 shadow-2xl">
-        <div className="relative z-10 max-w-2xl space-y-4">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      {/* Hero Welcome Banner with Direct Prompt Creation */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-amber-950/30 to-slate-900 border border-amber-500/20 p-6 sm:p-8 shadow-2xl">
+        <div className="relative z-10 max-w-3xl space-y-4">
           <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>Autonomous AI Video & Motion Graphics Engine</span>
+            <span>AI Motion Graphics & Video Generation</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-            Transform Creative Prompts into <span className="bg-gradient-to-r from-amber-400 via-orange-300 to-yellow-200 bg-clip-text text-transparent">Professional Motion Graphics</span>
+          <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+            Create Custom Reels from <span className="bg-gradient-to-r from-amber-400 via-orange-300 to-yellow-200 bg-clip-text text-transparent">Any Idea or Prompt</span>
           </h1>
-          <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-            Enter any prompt. Creator Studio writes the script, plans the storyboard, generates animated canvas graphics, synchronizes audio, and exports MP4 reels directly on phone or desktop.
+          <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
+            Every reel is generated completely unique from your prompt. The AI plans your script, scenes, kinetic captions, and motion graphics without pre-made templates.
           </p>
-          <div className="flex flex-wrap gap-3 pt-2">
-            <button
-              onClick={onCreateNewProject}
-              className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-bold text-sm shadow-lg shadow-amber-500/20 transition-all active:scale-95"
-            >
-              <Plus className="w-4 h-4 stroke-[3]" />
-              <span>Create New Project</span>
-            </button>
-            <button
-              onClick={() => onUseTemplate(QUICK_TEMPLATES[0].prompt)}
-              className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-slate-200 text-sm font-medium transition-all"
-            >
-              <Flame className="w-4 h-4 text-amber-400" />
-              <span>Instant Sukh Graphix Diwali Reel</span>
-            </button>
-          </div>
+
+          {/* Direct Prompt Input Box */}
+          <form onSubmit={handleHeroSubmit} className="pt-2 space-y-3">
+            <div className="relative">
+              <textarea
+                rows={3}
+                value={heroPrompt}
+                onChange={(e) => setHeroPrompt(e.target.value)}
+                placeholder="Describe your video idea... (e.g., A high-energy 15s fitness motivation reel for IronPeak Gym with electric neon typography, intense beat-synced cuts, and workout particles)"
+                className="w-full p-4 pr-12 bg-slate-950/90 border border-slate-700/80 rounded-2xl text-white text-xs sm:text-sm placeholder-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-all shadow-inner"
+              />
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span className="text-[11px] text-slate-400">
+                ⚡ Powered by OpenRouter AI • 1080x1920 60 FPS
+              </span>
+              <div className="flex items-center space-x-2">
+                <button
+                  type="submit"
+                  disabled={!heroPrompt.trim()}
+                  className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-amber-500/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
+                >
+                  <Sparkles className="w-4 h-4 stroke-[2.5]" />
+                  <span>Generate New Reel Storyboard</span>
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
 
         {/* Decorative background glow */}
@@ -147,58 +137,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      {/* Quick Start Prompt Templates */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-white flex items-center space-x-2">
-            <Sparkles className="w-4 h-4 text-amber-400" />
-            <span>Ready-to-Use Creative Templates</span>
-          </h2>
-          <span className="text-xs text-slate-400">Click any card to auto-plan</span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {QUICK_TEMPLATES.map((tmpl, idx) => {
-            const IconComponent = tmpl.icon;
-            return (
-              <div
-                key={idx}
-                onClick={() => onUseTemplate(tmpl.prompt)}
-                className={`group cursor-pointer rounded-xl border border-slate-800 hover:border-amber-500/40 bg-gradient-to-br ${tmpl.gradient} to-slate-900/60 p-5 transition-all duration-200 hover:-translate-y-1 shadow-md hover:shadow-xl`}
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-8 h-8 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-center text-amber-400">
-                    <IconComponent className="w-4 h-4" />
-                  </div>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-400/90 px-2 py-0.5 rounded bg-slate-950/80 border border-amber-500/20">
-                    {tmpl.badge}
-                  </span>
-                </div>
-                <h3 className="font-bold text-white text-sm mb-1.5 group-hover:text-amber-300 transition-colors">
-                  {tmpl.title}
-                </h3>
-                <p className="text-xs text-slate-400 line-clamp-2 mb-4 leading-relaxed">
-                  {tmpl.prompt}
-                </p>
-                <div className="flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-800/80 pt-3">
-                  <div className="flex items-center space-x-3">
-                    <span className="flex items-center space-x-1">
-                      <Clock className="w-3 h-3 text-slate-500" />
-                      <span>{tmpl.duration}</span>
-                    </span>
-                    <span>{tmpl.format}</span>
-                  </div>
-                  <span className="flex items-center space-x-1 text-amber-400 group-hover:translate-x-0.5 transition-transform">
-                    <span>Generate</span>
-                    <ArrowRight className="w-3 h-3" />
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
       {/* Projects List */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -217,7 +155,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             <Sparkles className="w-8 h-8 text-slate-600 mx-auto mb-2" />
             <h3 className="text-sm font-semibold text-slate-300">No projects yet</h3>
             <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-              Create your first motion-graphics reel using the button above or pick a template.
+              Enter your reel idea in the prompt box above to generate unique, custom scenes with AI.
             </p>
           </div>
         ) : (

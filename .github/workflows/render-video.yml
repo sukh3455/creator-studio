@@ -131,7 +131,17 @@ jobs:
             --payload-file "${{ steps.sanitize.outputs.payload_path }}" \
             --output "render_${{ inputs.job_id }}.mp4"
 
-      # Step 7: Ephemeral File Cleanup
+      # Step 7: Preserve Video as GitHub Artifact (Accessible directly from GitHub Actions Run)
+      - name: Upload Video Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-${{ inputs.job_id }}
+          path: render_${{ inputs.job_id }}.mp4
+          retention-days: 7
+          if-no-files-found: warn
+
+      # Step 8: Ephemeral File Cleanup
       - name: Cleanup Temporary Working Files
         if: always()
         run: |

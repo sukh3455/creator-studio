@@ -7,6 +7,7 @@ import {
   AspectRatio, 
   Scene 
 } from './types/creatorStudio';
+import { Sparkles, Plus } from 'lucide-react';
 import { loadSettings, saveSettings } from './services/settings/settingsStore';
 import { getDatabaseProvider, SAMPLE_DIWALI_PROJECT } from './services/db/databaseProvider';
 import { getStorageProvider } from './services/storage/storageProvider';
@@ -49,9 +50,8 @@ export const App: React.FC = () => {
       try {
         const loadedProjects = await db.getProjects();
         if (loadedProjects.length === 0) {
-          const seeded = await db.saveProject(SAMPLE_DIWALI_PROJECT);
-          setProjects([seeded]);
-          setCurrentProjectId(seeded.id);
+          setProjects([]);
+          setCurrentProjectId(null);
         } else {
           setProjects(loadedProjects);
           setCurrentProjectId(loadedProjects[0].id);
@@ -220,21 +220,65 @@ export const App: React.FC = () => {
           />
         )}
 
-        {activeTab === 'storyboard' && currentProject && (
-          <StoryboardApproval
-            project={currentProject}
-            onUpdateProject={handleUpdateProject}
-            onRegenerateScene={handleRegenerateScene}
-            onProceedToEditor={() => setActiveTab('editor')}
-            onProceedToRender={() => setIsRenderModalOpen(true)}
-          />
+        {activeTab === 'storyboard' && (
+          currentProject ? (
+            <StoryboardApproval
+              project={currentProject}
+              onUpdateProject={handleUpdateProject}
+              onRegenerateScene={handleRegenerateScene}
+              onProceedToEditor={() => setActiveTab('editor')}
+              onProceedToRender={() => setIsRenderModalOpen(true)}
+            />
+          ) : (
+            <div className="max-w-md mx-auto py-20 px-4 text-center space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-bold text-white">No Storyboard Selected</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Enter your creative concept prompt on the Dashboard or click below to generate your custom video scenes with AI.
+              </p>
+              <button
+                onClick={() => {
+                  setCreateInitialPrompt('');
+                  setIsCreateModalOpen(true);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 inline-flex items-center space-x-1.5"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Create New Video</span>
+              </button>
+            </div>
+          )
         )}
 
-        {activeTab === 'editor' && currentProject && (
-          <PreviewPlayer
-            project={currentProject}
-            onOpenRenderModal={() => setIsRenderModalOpen(true)}
-          />
+        {activeTab === 'editor' && (
+          currentProject ? (
+            <PreviewPlayer
+              project={currentProject}
+              onOpenRenderModal={() => setIsRenderModalOpen(true)}
+            />
+          ) : (
+            <div className="max-w-md mx-auto py-20 px-4 text-center space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-bold text-white">No Video to Preview</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Create a new project from your prompt to preview the real-time 60 FPS motion graphics canvas.
+              </p>
+              <button
+                onClick={() => {
+                  setCreateInitialPrompt('');
+                  setIsCreateModalOpen(true);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 inline-flex items-center space-x-1.5"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Create New Video</span>
+              </button>
+            </div>
+          )
         )}
 
         {activeTab === 'assets' && currentProject && (

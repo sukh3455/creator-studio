@@ -246,7 +246,7 @@ export class GitHubActionsRenderProvider implements IRenderProvider {
 
             const expectedOutputUrl = this.settings.r2BucketName
               ? `https://${this.settings.r2BucketName}.${this.settings.r2AccountId}.r2.cloudflarestorage.com/renders/${jobId}.mp4`
-              : `https://storage.example.com/renders/${jobId}.mp4`;
+              : undefined;
 
             return {
               jobId,
@@ -302,11 +302,11 @@ export class GitHubActionsRenderProvider implements IRenderProvider {
       : [entry.steps[0].log];
     const duration = entry.job.duration || 15;
 
-    // Construct durable storage link
+    // Construct durable storage link (only if R2 is configured)
     const outputUrl = latestStep.status === 'completed'
       ? (this.settings.r2BucketName
           ? `https://${this.settings.r2BucketName}.${this.settings.r2AccountId}.r2.cloudflarestorage.com/renders/${jobId}.mp4`
-          : `https://creator-studio-storage.local/renders/${jobId}.mp4`)
+          : undefined)
       : undefined;
 
     return {

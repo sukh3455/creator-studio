@@ -335,17 +335,147 @@ export const FINANCE_COMPOUNDING_TEMPLATE: TemplateMatch = {
   }
 };
 
+export function generateDynamicBespokeScenes(prompt: string, duration: number, brand: BrandKit): Scene[] {
+  const p = prompt.toLowerCase();
+  const sceneDuration = Math.round(duration / 3);
+
+  // Determine dynamic aesthetic
+  let theme: 'luxury_gold' | 'high_tech' | 'cyberpunk' | 'minimalist' = 'luxury_gold';
+  let bgColor = '#0B0F19';
+  let particleColor = '#F59E0B';
+  let particleStyle: 'ember_sparks' | 'golden_twinkles' | 'confetti' = 'golden_twinkles';
+
+  if (p.includes('gym') || p.includes('fitness') || p.includes('workout') || p.includes('energy') || p.includes('sport')) {
+    theme = 'high_tech';
+    bgColor = '#090D16';
+    particleColor = '#10B981';
+    particleStyle = 'ember_sparks';
+  } else if (p.includes('tech') || p.includes('ai') || p.includes('crypto') || p.includes('future') || p.includes('cyber')) {
+    theme = 'cyberpunk';
+    bgColor = '#0A0E1A';
+    particleColor = '#38BDF8';
+    particleStyle = 'ember_sparks';
+  } else if (p.includes('minimal') || p.includes('clean') || p.includes('book') || p.includes('art')) {
+    theme = 'minimalist';
+    bgColor = '#0A0A0E';
+    particleColor = '#E2E8F0';
+    particleStyle = 'golden_twinkles';
+  }
+
+  // Extract clean title / headline words
+  const cleanTitle = prompt.length > 35 ? prompt.slice(0, 32) + '...' : prompt;
+  const brandName = brand?.name && brand.name !== 'Sukh Graphix' ? brand.name : 'CREATOR STUDIO';
+
+  return [
+    {
+      id: `sc_dyn_1_${Date.now()}`,
+      order: 1,
+      title: `The Hook: ${cleanTitle}`,
+      label: 'SCENE 1: HOOK',
+      narration: `Are you ready to experience the next level? Here is why ${cleanTitle} changes everything.`,
+      captionText: `🔥 ${cleanTitle.toUpperCase()} 🔥\nThe Future Starts Now`,
+      duration: sceneDuration,
+      visualType: 'motion_graphic',
+      theme,
+      backgroundColor: bgColor,
+      elements: [
+        {
+          id: 'elem_dyn_p1',
+          type: 'particles',
+          props: { count: 65, color: particleColor, speed: 1.2, style: particleStyle }
+        },
+        {
+          id: 'elem_dyn_t1',
+          type: 'typography',
+          props: { text: cleanTitle.toUpperCase(), subtitle: 'Watch Till The End', style: theme === 'high_tech' ? 'neon_cyan' : 'festive_gold' }
+        },
+        {
+          id: 'elem_dyn_g1',
+          type: 'geometric',
+          props: { shape: 'badge', color: particleColor, pulse: true }
+        }
+      ],
+      assetRequirements: ['Dynamic opening riser', 'Bass drop impact'],
+      assignedAssetIds: {},
+      transition: 'fade',
+      approved: false
+    },
+    {
+      id: `sc_dyn_2_${Date.now()}`,
+      order: 2,
+      title: 'Value Proposition & Core Message',
+      label: 'SCENE 2: CORE MESSAGE',
+      narration: `Engineered for excellence. High performance, dynamic results, and unforgettable impact.`,
+      captionText: `⚡ UNSTOPPABLE MOMENTUM ⚡\nEngineered For Pure Performance`,
+      duration: sceneDuration,
+      visualType: 'motion_graphic',
+      theme,
+      backgroundColor: bgColor,
+      elements: [
+        {
+          id: 'elem_dyn_p2',
+          type: 'particles',
+          props: { count: 50, color: particleColor, speed: 1.0, style: particleStyle }
+        },
+        {
+          id: 'elem_dyn_t2',
+          type: 'typography',
+          props: { text: 'HIGH PERFORMANCE', subtitle: 'Crafted Without Compromise', style: theme === 'high_tech' ? 'neon_cyan' : 'festive_gold' }
+        }
+      ],
+      assetRequirements: ['Rhythmic synth beat', 'Whoosh transition sound'],
+      assignedAssetIds: {},
+      transition: 'slide_left',
+      approved: false
+    },
+    {
+      id: `sc_dyn_3_${Date.now()}`,
+      order: 3,
+      title: `Grand Finale & Call To Action`,
+      label: 'SCENE 3: BRAND FINALE',
+      narration: `Take action today. Follow and join ${brandName} to elevate your game.`,
+      captionText: `${brandName.toUpperCase()}\nLink in Bio • Follow For More`,
+      duration: duration - (sceneDuration * 2),
+      visualType: 'motion_graphic',
+      theme,
+      backgroundColor: bgColor,
+      elements: [
+        {
+          id: 'elem_dyn_p3',
+          type: 'particles',
+          props: { count: 80, color: particleColor, speed: 1.5, style: 'confetti' }
+        },
+        {
+          id: 'elem_dyn_b3',
+          type: 'brand_reveal',
+          props: {
+            brandName: brandName,
+            tagline: brand.tagline || 'Elevate Your Craft',
+            glowColor: particleColor,
+            lensSweep: true,
+            particleExplosion: true
+          }
+        }
+      ],
+      assetRequirements: ['Grand crescendo chime', 'Brand reveal impact'],
+      assignedAssetIds: {},
+      transition: 'zoom_in',
+      approved: false
+    }
+  ];
+}
+
 export function matchOfflineTemplate(prompt: string, duration: number, brand: BrandKit): Scene[] {
   const p = prompt.toLowerCase();
-  if (p.includes('diwali') || p.includes('festiv') || p.includes('deepavali') || p.includes('sukh graphix') || p.includes('diya')) {
+  if (p.includes('diwali') || p.includes('deepavali') || p.includes('diya')) {
     return FESTIVE_DIWALI_TEMPLATE.scenes(duration, brand);
   }
-  if (p.includes('saas') || p.includes('software') || p.includes('app') || p.includes('website') || p.includes('tech') || p.includes('automation')) {
+  if (p.includes('saas') || p.includes('software') || p.includes('dashboard') || p.includes('automation')) {
     return SAAS_PRODUCT_TEMPLATE.scenes(duration, brand);
   }
-  if (p.includes('compound') || p.includes('money') || p.includes('wealth') || p.includes('invest') || p.includes('finance') || p.includes('crypto')) {
+  if (p.includes('compound') || p.includes('wealth') || p.includes('investing')) {
     return FINANCE_COMPOUNDING_TEMPLATE.scenes(duration, brand);
   }
-  // Default to festive / creative brand template
-  return FESTIVE_DIWALI_TEMPLATE.scenes(duration, brand);
+  // Generate bespoke, dynamic scenes from the user's prompt
+  return generateDynamicBespokeScenes(prompt, duration, brand);
 }

@@ -33,22 +33,26 @@ export const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
   onSubmit,
   initialPrompt
 }) => {
-  const [prompt, setPrompt] = useState<string>(
-    initialPrompt ||
-      'Create a premium 15-second Diwali Reel for Sukh Graphix with elegant typography, custom animated diyas, glowing particles, festive music and a polished brand reveal.'
-  );
+  const [prompt, setPrompt] = useState<string>(initialPrompt || '');
   const [duration, setDuration] = useState<number>(15);
   const [aspectRatio, setAspectRatio] = useState<AspectRatio>('9:16');
-  const [stylePreset, setStylePreset] = useState<StylePreset>('festive');
+  const [stylePreset, setStylePreset] = useState<StylePreset>('cyberpunk');
 
-  // Brand Kit
-  const [brandName, setBrandName] = useState<string>('Sukh Graphix');
-  const [primaryColor, setPrimaryColor] = useState<string>('#F59E0B');
-  const [secondaryColor, setSecondaryColor] = useState<string>('#B45309');
-  const [tagline, setTagline] = useState<string>('Illuminating Creative Excellence');
+  // Brand Kit (defaults to empty/generic, not hardcoded Diwali)
+  const [brandName, setBrandName] = useState<string>('');
+  const [primaryColor, setPrimaryColor] = useState<string>('#3B82F6');
+  const [secondaryColor, setSecondaryColor] = useState<string>('#8B5CF6');
+  const [tagline, setTagline] = useState<string>('');
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [showBrandKit, setShowBrandKit] = useState<boolean>(false);
+
+  // Sync prompt whenever initialPrompt changes
+  React.useEffect(() => {
+    if (initialPrompt !== undefined) {
+      setPrompt(initialPrompt);
+    }
+  }, [initialPrompt]);
 
   if (!isOpen) return null;
 
@@ -113,7 +117,7 @@ export const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
               rows={3}
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Describe your video idea, narrative, visuals, branding, and mood..."
+              placeholder="e.g. 15-second high-energy fitness motivation reel with bold kinetic typography, glowing orange accents, and explosive beat transitions..."
               className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 placeholder-slate-600 transition-all resize-none"
               required
             />
@@ -238,8 +242,9 @@ export const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
                   <input
                     type="text"
                     value={brandName}
+                    placeholder="e.g. Acme Studio"
                     onChange={(e) => setBrandName(e.target.value)}
-                    className="w-full px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs"
+                    className="w-full px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs placeholder-slate-600"
                   />
                 </div>
                 <div className="space-y-1">
@@ -247,8 +252,9 @@ export const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
                   <input
                     type="text"
                     value={tagline}
+                    placeholder="e.g. Elevate Your Creative Vision"
                     onChange={(e) => setTagline(e.target.value)}
-                    className="w-full px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs"
+                    className="w-full px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-white text-xs placeholder-slate-600"
                   />
                 </div>
                 <div className="space-y-1">

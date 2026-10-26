@@ -80,48 +80,52 @@ function loadProject(opts) {
     }
   }
 
-  // Default Sukh Graphix Diwali Reel
+  // Default Modern Motion Graphics Reel (used only if payload is missing)
+  const d1 = Math.round(opts.duration / 3);
+  const d2 = Math.round(opts.duration / 3);
+  const d3 = Math.max(1, opts.duration - d1 - d2);
+
   return {
     id: opts.projectId,
-    title: 'Diwali Reel — Sukh Graphix',
+    title: 'Kinetic Motion Graphics Reel',
     duration: opts.duration,
     aspectRatio: opts.width < opts.height ? '9:16' : '16:9',
     brandKit: {
-      name: 'Sukh Graphix',
-      primaryColor: '#F59E0B',
-      secondaryColor: '#B45309',
-      tagline: 'Illuminating Creative Excellence'
+      name: 'Studio Vision',
+      primaryColor: '#3B82F6',
+      secondaryColor: '#8B5CF6',
+      tagline: 'Elevating Visual Motion'
     },
     scenes: [
       {
         order: 1,
-        title: 'Festive Greeting',
-        label: 'SCENE 1: FESTIVE DAWN',
-        narration: 'This Diwali, let light triumph over darkness and every creation shine with boundless radiance.',
-        captionText: '✨ Shubh Deepavali ✨\nCelebrate The Festival of Lights',
-        duration: Math.round(opts.duration / 3),
-        theme: 'diwali_festive',
-        backgroundColor: '#1E1100'
+        title: 'Hook & Kinetic Intro',
+        label: 'SCENE 1: HOOK',
+        narration: 'Capture instant attention with high-impact kinetic motion graphics and dynamic typography.',
+        captionText: '🚀 ELEVATE YOUR CONTENT\nCinematic Motion Graphics',
+        duration: d1,
+        theme: 'cyberpunk',
+        backgroundColor: '#0F172A'
       },
       {
         order: 2,
-        title: 'Creative Excellence',
-        label: 'SCENE 2: CREATIVE ESSENCE',
-        narration: 'From imaginative vision to breathtaking visuals, we craft designs that illuminate your brand story.',
-        captionText: 'Crafting Visual Magic\nThat Elevates Your Brand',
-        duration: Math.round(opts.duration / 3),
-        theme: 'luxury_gold',
-        backgroundColor: '#170E05'
+        title: 'Core Message & Value',
+        label: 'SCENE 2: VALUE',
+        narration: 'Transform complex ideas into clean, engaging visuals built to stop the scroll.',
+        captionText: 'Precision Visual Storytelling\nEngineered To Convert',
+        duration: d2,
+        theme: 'modern_blue',
+        backgroundColor: '#020617'
       },
       {
         order: 3,
-        title: 'Brand Reveal — Sukh Graphix',
-        label: 'SCENE 3: BRAND REVEAL',
-        narration: 'Sukh Graphix wishes you prosperity, success, and endless joy this Diwali.',
-        captionText: 'SUKH GRAPHIX\nIlluminating Creative Excellence',
-        duration: opts.duration - (Math.round(opts.duration / 3) * 2),
+        title: 'Call to Action & Outro',
+        label: 'SCENE 3: BRAND OUTRO',
+        narration: 'Ready to elevate your presence? Let us create your next viral reel today.',
+        captionText: 'STUDIO VISION\nElevating Visual Motion',
+        duration: d3,
         theme: 'luxury_gold',
-        backgroundColor: '#0D0800'
+        backgroundColor: '#0A0A0A'
       }
     ]
   };
