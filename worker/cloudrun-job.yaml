@@ -1,0 +1,34 @@
+apiVersion: run.googleapis.com/v1
+kind: Job
+metadata:
+  name: creator-studio-renderer
+  labels:
+    cloud.googleapis.com/location: us-central1
+spec:
+  template:
+    spec:
+      template:
+        spec:
+          containers:
+          - image: gcr.io/PROJECT_ID/creator-studio-renderer:latest
+            resources:
+              limits:
+                memory: 2Gi
+                cpu: 2000m
+            env:
+            - name: SUPABASE_URL
+              value: ""
+            - name: SUPABASE_SERVICE_ROLE_KEY
+              value: ""
+            - name: R2_ACCOUNT_ID
+              value: ""
+            - name: R2_ACCESS_KEY_ID
+              value: ""
+            - name: R2_SECRET_ACCESS_KEY
+              value: ""
+            - name: R2_BUCKET_NAME
+              value: ""
+            - name: NODE_ENV
+              value: "production"
+          timeoutSeconds: 600
+          maxRetries: 3

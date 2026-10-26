@@ -1,14 +1,33 @@
 {
-  "name": "watermarkout",
+  "name": "creator-studio",
   "version": "1.0.0",
-  "description": "AI Watermark Remover — local in-browser processing with OpenCV.js + FFmpeg.wasm",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "npx serve . --cors --no-clipboard -p 3000",
-    "build": "echo 'Static site — no build step needed'",
-    "start": "npx serve . --cors -p 3000"
+    "dev": "node ./node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5173",
+    "build": "node ./node_modules/vite/bin/vite.js build",
+    "preview": "node ./node_modules/vite/bin/vite.js preview --host 127.0.0.1 --port 5173",
+    "test": "node ./node_modules/vitest/vitest.mjs run"
   },
-  "keywords": ["watermark", "removal", "opencv", "ffmpeg", "inpainting"],
-  "license": "MIT"
+  "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
+    "canvas-confetti": "^1.9.4",
+    "lucide-react": "^1.16.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.6.1",
+    "postcss": "^8.5.31",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0",
+    "vite-plugin-singlefile": "^2.1.0",
+    "vitest": "^5.0.5"
+  }
 }
