@@ -77,6 +77,55 @@ export const App: React.FC = () => {
     saveSettings(newSettings);
   };
 
+  // Mobile Hardware / Gesture Back Button Interceptor
+  // Prevents mobile browser from navigating away and closing the site
+  useEffect(() => {
+    const handlePopState = () => {
+      if (isSettingsModalOpen) {
+        setIsSettingsModalOpen(false);
+        return;
+      }
+      if (isRenderModalOpen) {
+        setIsRenderModalOpen(false);
+        return;
+      }
+      if (isCreateModalOpen) {
+        setIsCreateModalOpen(false);
+        return;
+      }
+      if (activeTab !== 'dashboard') {
+        setActiveTab('dashboard');
+        return;
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isSettingsModalOpen, isRenderModalOpen, isCreateModalOpen, activeTab]);
+
+  const handleOpenSettings = () => {
+    window.history.pushState({ modal: 'settings' }, '');
+    setIsSettingsModalOpen(true);
+  };
+
+  const handleOpenRender = () => {
+    window.history.pushState({ modal: 'render' }, '');
+    setIsRenderModalOpen(true);
+  };
+
+  const handleOpenCreate = (prompt = '') => {
+    setCreateInitialPrompt(prompt);
+    window.history.pushState({ modal: 'create' }, '');
+    setIsCreateModalOpen(true);
+  };
+
+  const handleTabChange = (newTab: TabType) => {
+    if (newTab !== activeTab) {
+      window.history.pushState({ tab: newTab }, '');
+      setActiveTab(newTab);
+    }
+  };
+
   // Create & Plan Project with AI / Offline Template
   const handleCreateProject = async (data: {
     prompt: string;
@@ -101,13 +150,12 @@ export const App: React.FC = () => {
     setCurrentProjectId(saved.id);
 
     // Direct user to Storyboard Approval Screen immediately after planning
-    setActiveTab('storyboard');
+    handleTabChange('storyboard');
   };
 
   // Open creation modal with pre-filled prompt
   const handleUseTemplate = (prompt: string) => {
-    setCreateInitialPrompt(prompt);
-    setIsCreateModalOpen(true);
+    handleOpenCreate(prompt);
   };
 
   // Update Project
@@ -192,10 +240,10 @@ export const App: React.FC = () => {
       {/* Global Header */}
       <Header
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleTabChange}
         currentProject={currentProject}
-        onOpenSettings={() => setIsSettingsModalOpen(true)}
-        onOpenRenderModal={() => setIsRenderModalOpen(true)}
+        onOpenSettings={handleOpenSettings}
+        onOpenRenderModal={handleOpenRender}
         onAspectRatioChange={handleAspectRatioChange}
       />
 
@@ -208,15 +256,12 @@ export const App: React.FC = () => {
             settings={settings}
             onSelectProject={(id) => {
               setCurrentProjectId(id);
-              setActiveTab('storyboard');
+              handleTabChange('storyboard');
             }}
-            onCreateNewProject={() => {
-              setCreateInitialPrompt('');
-              setIsCreateModalOpen(true);
-            }}
+            onCreateNewProject={() => handleOpenCreate('')}
             onUseTemplate={handleUseTemplate}
             onDeleteProject={handleDeleteProject}
-            onOpenSettings={() => setIsSettingsModalOpen(true)}
+            onOpenSettings={handleOpenSettings}
           />
         )}
 
@@ -226,8 +271,9 @@ export const App: React.FC = () => {
               project={currentProject}
               onUpdateProject={handleUpdateProject}
               onRegenerateScene={handleRegenerateScene}
-              onProceedToEditor={() => setActiveTab('editor')}
-              onProceedToRender={() => setIsRenderModalOpen(true)}
+              onProceedToEditor={() => handleTabChange('editor')}
+              onProceedToRender={handleOpenRender}
+              onBackToDashboard={() => handleTabChange('dashboard')}
             />
           ) : (
             <div className="max-w-md mx-auto py-20 px-4 text-center space-y-4">
@@ -239,10 +285,7 @@ export const App: React.FC = () => {
                 Enter your creative concept prompt on the Dashboard or click below to generate your custom video scenes with AI.
               </p>
               <button
-                onClick={() => {
-                  setCreateInitialPrompt('');
-                  setIsCreateModalOpen(true);
-                }}
+                onClick={() => handleOpenCreate('')}
                 className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 inline-flex items-center space-x-1.5"
               >
                 <Plus className="w-4 h-4" />
@@ -256,7 +299,7 @@ export const App: React.FC = () => {
           currentProject ? (
             <PreviewPlayer
               project={currentProject}
-              onOpenRenderModal={() => setIsRenderModalOpen(true)}
+              onOpenRenderModal={handleOpenRender}
             />
           ) : (
             <div className="max-w-md mx-auto py-20 px-4 text-center space-y-4">
@@ -268,10 +311,7 @@ export const App: React.FC = () => {
                 Create a new project from your prompt to preview the real-time 60 FPS motion graphics canvas.
               </p>
               <button
-                onClick={() => {
-                  setCreateInitialPrompt('');
-                  setIsCreateModalOpen(true);
-                }}
+                onClick={() => handleOpenCreate('')}
                 className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 inline-flex items-center space-x-1.5"
               >
                 <Plus className="w-4 h-4" />
@@ -296,7 +336,7 @@ export const App: React.FC = () => {
         {activeTab === 'renders' && currentProject && (
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <button
-              onClick={() => setIsRenderModalOpen(true)}
+              onClick={handleOpenRender}
               className="mb-6 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20"
             >
               + Open Export & Render Center
@@ -351,7 +391,7 @@ export const App: React.FC = () => {
           settings={settings}
           onSaveRenderJob={handleSaveRenderJob}
           onUpdateRenderJob={handleUpdateRenderJob}
-          onGoToStoryboard={() => setActiveTab('storyboard')}
+          onGoToStoryboard={() => handleTabChange('storyboard')}
         />
       )}
     </div>

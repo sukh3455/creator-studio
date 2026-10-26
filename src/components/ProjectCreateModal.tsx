@@ -85,28 +85,30 @@ export const ProjectCreateModal: React.FC<ProjectCreateModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-md p-2.5 sm:p-6 overscroll-contain flex flex-col justify-start sm:justify-center items-center">
+      <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl flex flex-col my-auto max-h-[92dvh] sm:max-h-[88dvh] overflow-hidden">
+        {/* Sticky Header with prominent, tap-friendly X button */}
+        <div className="sticky top-0 z-20 bg-slate-900/95 backdrop-blur-md px-5 py-4 border-b border-slate-800 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-2.5">
             <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">Create New Video Project</h2>
-              <p className="text-xs text-slate-400">Natural-language prompt-to-video creative director</p>
+              <h2 className="text-base sm:text-lg font-bold text-white">Create New Video Project</h2>
+              <p className="text-[11px] text-slate-400">Natural-language prompt-to-video creative director</p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+            aria-label="Close dialog"
+            className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition-colors active:scale-95 min-w-[40px] min-h-[40px] flex items-center justify-center"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleFormSubmit} className="space-y-6">
+        <form onSubmit={handleFormSubmit} className="flex-1 overflow-y-auto overscroll-contain p-5 sm:p-6 space-y-6">
           {/* Prompt Area */}
           <div className="space-y-2">
             <label className="text-xs font-semibold text-slate-200 flex items-center justify-between">

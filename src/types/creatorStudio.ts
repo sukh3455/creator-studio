@@ -48,10 +48,16 @@ export interface BrandKit {
 
 export type VisualElementType = 
   | 'typography' 
+  | 'kinetic_headline'
+  | 'hero_card'
+  | 'metric_grid'
+  | 'geometric_focus'
+  | 'vector_illustration'
   | 'diya' 
   | 'particles' 
   | 'device_mockup' 
   | 'brand_reveal' 
+  | 'brand_outro'
   | 'geometric' 
   | 'custom_code' 
   | 'asset_overlay';
@@ -76,6 +82,21 @@ export type SceneTransition =
   | 'particle_dissolve' 
   | 'wipe';
 
+export type CompositionLayout = 
+  | 'split_editorial' 
+  | 'hero_badge' 
+  | 'metric_grid' 
+  | 'kinetic_monolith' 
+  | 'geometric_focus' 
+  | 'brand_outro';
+
+export type CameraMotion = 
+  | 'zoom_in' 
+  | 'zoom_out' 
+  | 'pan_drift_up' 
+  | 'pan_drift_down' 
+  | 'steady';
+
 export interface Scene {
   id: string;
   order: number;
@@ -87,6 +108,9 @@ export interface Scene {
   visualType: 'motion_graphic' | 'asset' | 'web_capture' | 'hybrid';
   theme: string;
   backgroundColor: string;
+  compositionLayout?: CompositionLayout;
+  focalConcept?: string;
+  cameraMotion?: CameraMotion;
   visualCode?: string; // High-performance 60fps canvas code
   elements: VisualElement[];
   assetRequirements: string[];

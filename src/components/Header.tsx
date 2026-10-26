@@ -127,9 +127,9 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Right Controls: Aspect Ratio + Render Trigger + Settings */}
           <div className="flex items-center space-x-2">
-            {/* Aspect Ratio Switcher */}
+            {/* Aspect Ratio Switcher (Tablet/Desktop) */}
             {currentProject && (
-              <div className="flex items-center bg-slate-950 border border-slate-800 rounded-lg p-0.5">
+              <div className="hidden sm:flex items-center bg-slate-950 border border-slate-800 rounded-lg p-0.5">
                 <button
                   title="9:16 Vertical Reel"
                   onClick={() => onAspectRatioChange('9:16')}
@@ -170,17 +170,18 @@ export const Header: React.FC<HeaderProps> = ({
             {currentProject && (
               <button
                 onClick={onOpenRenderModal}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-md ${
+                className={`flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-md shrink-0 ${
                   isApproved
                     ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 hover:brightness-110 active:scale-95'
                     : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
                 }`}
               >
-                <Film className="w-3.5 h-3.5" />
-                <span>Export Video</span>
+                <Film className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden sm:inline">Export Video</span>
+                <span className="sm:hidden">Export</span>
                 {!isApproved && (
                   <span title="Storyboard approval required before final export">
-                    <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
+                    <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                   </span>
                 )}
               </button>
