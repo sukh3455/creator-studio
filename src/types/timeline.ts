@@ -92,6 +92,15 @@ export type CharacterPose =
 
 export type CharacterPosition = 'center' | 'left' | 'right';
 
+export type VisualPropType = 
+  | 'snowball' 
+  | 'coin_stack' 
+  | 'rocket' 
+  | 'brain' 
+  | 'clock' 
+  | 'dumbbell' 
+  | string;
+
 export interface SceneItem {
   text: string;
   label: string;

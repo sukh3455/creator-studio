@@ -112,7 +112,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               activeTab === 'github' ? 'bg-slate-800 text-amber-400 border-b-2 border-amber-400' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <Github className="w-3.5 h-3.5" />
+            <GithubIcon className="w-3.5 h-3.5" />
             <span>GitHub Actions</span>
           </button>
           <button
@@ -232,7 +232,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex items-start justify-between">
                 <div>
                   <h4 className="text-xs font-bold text-white flex items-center space-x-1.5">
-                    <Github className="w-4 h-4 text-amber-400" />
+                    <GithubIcon className="w-4 h-4 text-amber-400" />
                     <span>Free Cloud Rendering Backend</span>
                   </h4>
                   <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
