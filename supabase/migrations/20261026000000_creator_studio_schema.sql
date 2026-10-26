@@ -48,7 +48,7 @@ create table if not exists public.render_jobs (
   id text primary key default ('job_' || replace(uuid_generate_v4()::text, '-', '')),
   user_id uuid references auth.users(id) on delete cascade default auth.uid(),
   project_id text references public.projects(id) on delete cascade,
-  target text not null default 'browser' check (target in ('browser', 'cloud_run')),
+  target text not null default 'github_actions' check (target in ('browser', 'cloud_run', 'github_actions')),
   status text not null default 'pending' check (status in ('pending', 'rendering', 'completed', 'failed', 'cancelled')),
   progress integer not null default 0 check (progress >= 0 and progress <= 100),
   output_url text,
