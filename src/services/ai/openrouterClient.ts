@@ -13,10 +13,10 @@ export interface OpenRouterCompletionOptions {
 }
 
 export const FREE_MODELS = [
-  { id: 'google/gemini-2.0-flash-exp:free', name: 'Google Gemini 2.0 Flash (Free)', description: 'Ultra-fast & multimodal' },
-  { id: 'meta-llama/llama-3.3-70b-instruct:free', name: 'Meta Llama 3.3 70B (Free)', description: 'Exceptional creative reasoning' },
-  { id: 'deepseek/deepseek-r1:free', name: 'DeepSeek R1 (Free)', description: 'Deep reasoning & structured planning' },
-  { id: 'qwen/qwen-2.5-coder-32b-instruct:free', name: 'Qwen 2.5 Coder 32B (Free)', description: 'Precise code generation' }
+  { id: 'nvidia/nemotron-3.5-lightning:free', name: 'Nvidia Nemotron 3.5 Lightning (Free)', description: 'Ultra-fast, high-accuracy reasoning & planning' },
+  { id: 'google/gemma-4-31b-it:free', name: 'Google Gemma 4 31B (Free)', description: 'High-capacity creative language generation' },
+  { id: 'google/gemma-4-26b-a4b-it:free', name: 'Google Gemma 4 26B MoE (Free)', description: 'Efficient multimodal instruction following' },
+  { id: 'recursive/flint-v1.0:free', name: 'Flint v1.0 (Free)', description: 'Concise creative structured scriptwriting' }
 ];
 
 export const PAID_RECOMMENDED_MODELS = [

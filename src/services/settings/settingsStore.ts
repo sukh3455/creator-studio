@@ -4,7 +4,7 @@ const SETTINGS_KEY = 'creator_studio_provider_settings_v1';
 
 export const DEFAULT_SETTINGS: ProviderSettings = {
   openRouterApiKey: '',
-  openRouterModel: 'google/gemini-2.0-flash-exp:free',
+  openRouterModel: 'nvidia/nemotron-3.5-lightning:free',
   openRouterFreeOnly: true,
   supabaseUrl: '',
   supabaseAnonKey: '',
